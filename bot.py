@@ -1,0 +1,157 @@
+import asyncio
+import websockets
+import requests
+import time
+
+# ========= CONFIG =========
+# Tokens y Nombres
+TOKEN = "kk7bd8x8qhxeww4x147s1s2rdh0gq6"  # SIN "oauth:" (Tu token de bot)
+APP_TOKEN = "epaglgmhskyal8sesozk0egutp7w47"  # Token de App (para la API)
+CLIENT_ID = "u4jxn8cgm5ki14grzcmedwc8yh5pr5"
+
+# Info del Canal
+BOT_NAME = "crimul_bot"
+CHANNEL = "crimul_taquita"
+BROADCASTER_ID = "930537744"  # ID numérico del streamer
+
+# URL de Google Apps Script (¡Pega la nueva URL de la implementación!)
+GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyNkhNnLkxx0bqxV5rGbQGnjv64Ny5ldga2nWzsznPokb5n0NejNM3FC8bdhSzwsjBz/exec"
+
+
+# ==========================
+
+
+# Tarea 1: Escuchar el chat de Twitch
+async def connect_to_chat():
+    uri = "wss://irc-ws.chat.twitch.tv:443"
+
+    while True:  # Bucle de reconexión
+        try:
+            async with websockets.connect(uri) as ws:
+                await ws.send(f"PASS oauth:{TOKEN}")
+                await ws.send(f"NICK {BOT_NAME}")
+                await ws.send("CAP REQ :twitch.tv/commands twitch.tv/tags")
+                await ws.send(f"JOIN #{CHANNEL}")
+                print(f"✅ (Chat) Conectado a: {CHANNEL}")
+
+                while True:
+                    msg = await ws.recv()
+
+                    if msg.startswith("PING"):
+                        await ws.send("PONG :tmi.twitch.tv")
+                        continue
+
+                    if "PRIVMSG" in msg:
+                        # Extrae el usuario y el texto
+                        prefix = msg.split("PRIVMSG", 1)[0]
+                        username = prefix.split("display-name=", 1)[1].split(";", 1)[0]
+                        text = msg.split("PRIVMSG", 1)[1].split(" :", 1)[1].strip().lower()
+
+                        print(f"  (Chat) {username}: {text}")
+
+                        # --- Lógica de Comandos ---
+
+                        # _AQUÍ ESTÁ LA CORRECCIÓN_ (se usa paréntesis)
+                        if text.startswith("!asistencia"):
+                            print(f"⚡ (Chat) Registrando !asistencia para {username}")
+                            try:
+                                requests.get(GAS_WEBHOOK_URL, params={
+                                    "action": "asistencia",
+                                    "user": username
+                                }, timeout=5)
+                            except requests.RequestException as e:
+                                print(f"ERROR al enviar !asistencia: {e}")
+
+                        # Este se queda con '==' para no confundirse con el de arriba
+                        elif text == "!asistenciaextra":
+                            print(f"⚡ (Chat) Registrando !asistenciaextra para {username}")
+                            try:
+                                requests.get(GAS_WEBHOOK_URL, params={
+                                    "action": "extra",
+                                    "user": username
+                                }, timeout=5)
+                            except requests.RequestException as e:
+                                print(f"ERROR al enviar !asistenciaextra: {e}")
+
+        except websockets.exceptions.ConnectionClosed:
+            print("⚠️ (Chat) Conexión perdida. Reconectando en 10 segundos...")
+            await asyncio.sleep(10)
+        except Exception as e:
+            print(f"⚠️ (Chat) Error inesperado: {e}. Reconectando en 10 segundos...")
+            await asyncio.sleep(10)
+
+
+# Tarea 2: Preguntar a la API si el stream está vivo (Polling)
+async def poll_stream_status():
+    global stream_is_online  # Variable global para saber el estado
+
+    url_helix = f"https://api.twitch.tv/helix/streams?user_id={BROADCASTER_ID}"
+    headers = {
+        "Client-ID": CLIENT_ID,
+        "Authorization": f"Bearer {APP_TOKEN}"
+    }
+
+    print(" polling")
+
+    while True:
+        try:
+            r = requests.get(url_helix, headers=headers, timeout=5)
+
+            if r.status_code == 200:
+                data = r.json().get("data", [])
+
+                # Si 'data' tiene algo, el stream está ON
+                current_status_is_online = len(data) > 0
+
+                if current_status_is_online and not stream_is_online:
+                    # CAMBIO: Estaba OFF -> ahora ON
+                    print("🔴 (API) STREAM INICIADO. Guardando startTimeUTC...")
+                    requests.get(GAS_WEBHOOK_URL, params={"action": "stream_start"}, timeout=5)
+
+                elif not current_status_is_online and stream_is_online:
+                    # CAMBIO: Estaba ON -> ahora OFF
+                    print("⚫ (API) STREAM FINALIZADO. Guardando endTimeUTC...")
+                    requests.get(GAS_WEBHOOK_URL, params={"action": "stream_stop"}, timeout=5)
+
+                # Actualizamos el estado global
+                stream_is_online = current_status_is_online
+
+            elif r.status_code == 401:
+                print("Error 401: Token (APP_TOKEN) inválido o expirado.")
+
+            # _AQUÍ ESTÁ EL CAMBIO_ (5 minutos)
+            print("  (API) Chequeo realizado. Próximo chequeo en 1 minuto.")
+            await asyncio.sleep(60)
+
+        except requests.RequestException as e:
+            print(f"⚠️ (API) Error de conexión al consultar API: {e}. Reintentando en 60s.")
+            await asyncio.sleep(60)
+        except Exception as e:
+            print(f"⚠️ (API) Error inesperado: {e}. Reintentando en 60s.")
+            await asyncio.sleep(60)
+
+
+# Función principal para correr ambas tareas
+async def main():
+    # Tarea 1: Correr el chat
+    task_chat = asyncio.create_task(connect_to_chat())
+
+    # Tarea 2: Correr el polling de la API
+    task_api_poll = asyncio.create_task(poll_stream_status())
+
+    # Mantenemos ambas tareas corriendo
+    await asyncio.gather(task_chat, task_api_poll)
+
+
+if __name__ == "__main__":
+    # Estado inicial: Asumimos que el stream está offline al empezar
+    stream_is_online = False
+
+    print("=== INICIANDO BOT DE ASISTENCIA (Chat + Polling API) ===")
+    print(f"URL de Google Script: {GAS_WEBHOOK_URL}")
+    print("Presiona Ctrl+C para detener.")
+
+    try:
+        asyncio.run(main())
+    except KeyboardInterrupt:
+        print("\nCerrando bot...")
