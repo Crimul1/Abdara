@@ -15,7 +15,7 @@ CHANNEL = "abdara12"
 BROADCASTER_ID = "930537744"  # ID numérico del streamer
 
 # URL de Google Apps Script (¡Verifica que sea la tuya!)
-GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwaVVPEAbUmNuvaToSMkKBvIUzJxVN5POF-imjGDFRXFsmBUig68YBgZFDSrKcSFRE3/exec"
+GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyuKcRSYLocxg4ngwnw3a0dRlU51vrwOIs6DN74hGweWAr82IB5sTExzoiRloF4Hk4x/exec"
 
 # Tiempo de chequeo de API (en segundos)
 POLL_INTERVAL = 300  # 300 segundos = 5 minutos
@@ -152,4 +152,5 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         print("\nCerrando bot...")
+
 
