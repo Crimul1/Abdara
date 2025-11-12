@@ -93,7 +93,7 @@ main{grid-area:m;position:relative;padding:16px;height:calc(100vh - var(--h));ov
     <section id="view-cal" class="view active">
       <div class="card" style="height:100%;display:flex;flex-direction:column;gap:10px">
         <div class="controls" style="justify-content:space-between">
-          <div><span style="color:var(--dim)">Dias de stream marcados.</span></div>
+          <div><span style="color:var(--dim)">Días con stream se iluminan.</span></div>
           <div>
             <button id="btnRefresh" class="btn">Actualizar</button>
           </div>
@@ -163,45 +163,45 @@ const ZONE = "America/Guatemala";
 let DATA = { asistencia: [], streams: {} };
 let calendar;
 const state = { query:"", sort:"DESC", page:1, pageSize:15, rows:[] };
+let autoTimer = null;
 
 const $ = s=>document.querySelector(s);
-const $$ = s=>document.querySelectorAll(s);
-
 function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1200);}
 
 function hasStream(dateISO){
   const d = DATA.streams?.[dateISO];
-  // marcar sólo si existe startTimeUTC (no marcar si el sheet quedó vacío)
   return d && typeof d.startTimeUTC === "string" && d.startTimeUTC.length>0;
 }
 
 async function fetchData(){
-  // cache-busting & robustez ante hojas vacías
-  const url = API_URL + "&t=" + Date.now();
-  const r = await fetch(url, {cache:"no-store"});
-  const j = await r.json().catch(()=>({asistencia:[],streams:{}}));
+  const url = API_URL + "&t=" + Date.now(); // cache-busting
+  let j = {asistencia:[],streams:{}};
+  try{
+    const r = await fetch(url,{cache:"no-store"});
+    j = await r.json();
+  }catch(e){ /* mantener j por defecto */ }
 
-  // Sanitizar: quitar filas malas/headers/usuarios vacíos
-  const asistencia = Array.isArray(j.asistencia)? j.asistencia.filter(row=>{
+  // limpiar filas rotas/vacías
+  const as = Array.isArray(j.asistencia) ? j.asistencia : [];
+  const asistencia = as.filter(row=>{
     if(!row || row.length<3) return false;
     const ts=row[0], user=row[1], tipo=row[2];
-    if(!user || typeof user!=="string" || user.trim()==="") return false;
     if(!ts || typeof ts!=="string") return false;
+    if(!user || String(user).trim()==="") return false;
     if(!["normal","tarde","extra"].includes(String(tipo))) return false;
     return true;
-  }):[];
+  });
 
   const streams = (j.streams && typeof j.streams==="object") ? j.streams : {};
-
   DATA = { asistencia, streams };
 }
 
-function destroyCalendar(){ if(calendar){ try{ calendar.destroy(); }catch(e){} calendar=null; } }
+function destroyCalendar(){ if(calendar){ try{calendar.destroy();}catch(e){} calendar=null; } }
 
 function renderCalendar(){
   destroyCalendar();
-  const el = $("#calendar");
-  calendar = new FullCalendar.Calendar(el, {
+  const el = document.getElementById("calendar");
+  calendar = new FullCalendar.Calendar(el,{
     height:"100%", expandRows:true, initialView:"dayGridMonth",
     locale:"es", timeZone: ZONE,
     headerToolbar:{ left:"prev,next today", center:"title", right:"dayGridMonth,timeGridWeek" },
@@ -211,7 +211,7 @@ function renderCalendar(){
     },
     dateClick(info){
       const dateISO = info.dateStr;
-      if(!hasStream(dateISO)) return; // no hacer nada si no hubo stream
+      if(!hasStream(dateISO)) return; // día sin stream, no hace nada
 
       const list = DATA.asistencia.filter(a=>{
         const fa = new Date(a[0]).toLocaleDateString("en-CA",{timeZone:ZONE});
@@ -220,22 +220,21 @@ function renderCalendar(){
 
       const html = list.length
         ? `<ul style="list-style:none;padding:0;margin:0">
-            ${list.map(a=>`<li style="padding:8px 0;border-bottom:1px dashed var(--border)">
+             ${list.map(a=>`<li style="padding:8px 0;border-bottom:1px dashed var(--border)">
                <b>${a[1]}</b> <span style="color:#ff38c7">(${a[2]})</span>
              </li>`).join("")}
            </ul>`
-        : `<div class="skel" style="width:100%"></div><p style="margin-top:8px;color:var(--dim)">Sin registros para este día.</p>`;
+        : `<p style="color:var(--dim)">Sin registros de asistencia en este stream.</p>`;
 
-      $("#modalTitle").textContent = `Asistencias — ${dateISO}`;
-      $("#modal").classList.add("open");
-      $("#modalBody").innerHTML = html;
+      document.getElementById("modalTitle").textContent = `Asistencias — ${dateISO}`;
+      document.getElementById("modalBody").innerHTML = html;
+      document.getElementById("modal").classList.add("open");
     }
   });
   calendar.render();
 }
 
 function buildTopRows(){
-  // contar solo normal+tarde
   const cnt = new Map();
   for(const r of DATA.asistencia){
     const user = r[1], tipo = r[2];
@@ -248,11 +247,9 @@ function buildTopRows(){
 
 function renderTop(){
   let rows = state.rows.slice();
+  const q = state.query;
+  if(q) rows = rows.filter(r=> r.user.toLowerCase().includes(q));
 
-  // filtro por nombre
-  if(state.query){ rows = rows.filter(r=> r.user.toLowerCase().includes(state.query)); }
-
-  // orden
   if(state.sort==="DESC") rows.sort((a,b)=>b.count-a.count);
   if(state.sort==="ASC") rows.sort((a,b)=>a.count-b.count);
   if(state.sort==="AZ")  rows.sort((a,b)=>a.user.localeCompare(b.user));
@@ -264,7 +261,7 @@ function renderTop(){
   const start=(state.page-1)*state.pageSize, end=start+state.pageSize;
   const pageRows = rows.slice(start,end);
 
-  const listEl = $("#list");
+  const listEl = document.getElementById("list");
   listEl.innerHTML="";
   if(pageRows.length===0){
     listEl.innerHTML = `<li style="grid-column:1/-1;color:var(--dim)">Sin datos</li>`;
@@ -277,52 +274,50 @@ function renderTop(){
     }
     listEl.appendChild(frag);
   }
-  $("#pageInfo").textContent=`Página ${state.page} / ${maxPage} — ${total} usuarios`;
+  document.getElementById("pageInfo").textContent=`Página ${state.page} / ${maxPage} — ${total} usuarios`;
   listEl.scrollTop=0;
 }
 
 function show(view){
-  $("#view-cal").classList.remove("active");
-  $("#view-top").classList.remove("active");
-  if(view==="cal") $("#view-cal").classList.add("active");
-  if(view==="top") $("#view-top").classList.add("active");
+  document.getElementById("view-cal").classList.remove("active");
+  document.getElementById("view-top").classList.remove("active");
+  if(view==="cal") document.getElementById("view-cal").classList.add("active");
+  if(view==="top") document.getElementById("view-top").classList.add("active");
 }
 
 async function refreshAll(silent=false){
-  await fetchData();            // lee HOJA ACTUAL
-  renderCalendar();             // repinta calendario con lo nuevo
-  buildTopRows();               // recalcula top
-  if($("#view-top").classList.contains("active")) renderTop();
+  await fetchData();
+  renderCalendar();
+  buildTopRows();
+  if(document.getElementById("view-top").classList.contains("active")) renderTop();
   if(!silent) toast("Datos actualizados");
 }
 
-// UI
 document.addEventListener("DOMContentLoaded", async ()=>{
-  // cargar
   await refreshAll(true);
 
-  // auto-update cada 30s
-  setInterval(()=>refreshAll(true), 30000);
+  // auto-refresh cada 30s
+  autoTimer = setInterval(()=>refreshAll(true), 30000);
 
   // nav
-  $("#nav-cal").onclick=()=>{ show("cal"); $("#nav-cal").classList.add("active"); $("#nav-top").classList.remove("active"); };
-  $("#nav-top").onclick=()=>{ show("top"); $("#nav-top").classList.add("active"); $("#nav-cal").classList.remove("active"); renderTop(); };
+  document.getElementById("nav-cal").onclick=()=>{ show("cal"); document.getElementById("nav-cal").classList.add("active"); document.getElementById("nav-top").classList.remove("active"); };
+  document.getElementById("nav-top").onclick=()=>{ show("top"); document.getElementById("nav-top").classList.add("active"); document.getElementById("nav-cal").classList.remove("active"); renderTop(); };
 
   // botones
-  $("#btnBack").onclick=()=>show("cal");
-  $("#btnRefresh").onclick=()=>refreshAll();
-  $("#btnRefresh2").onclick=()=>refreshAll();
+  document.getElementById("btnBack").onclick=()=>show("cal");
+  document.getElementById("btnRefresh").onclick=()=>refreshAll();
+  document.getElementById("btnRefresh2").onclick=()=>refreshAll();
 
   // top controls
-  $("#search").addEventListener("input", (e)=>{ state.query=(e.target.value||"").toLowerCase(); state.page=1; renderTop(); });
-  $("#sort").addEventListener("change", (e)=>{ state.sort=e.target.value; state.page=1; renderTop(); });
-  $("#pageSize").addEventListener("change", (e)=>{ state.pageSize=parseInt(e.target.value,10); state.page=1; renderTop(); });
-  $("#prev").onclick=()=>{ if(state.page>1){ state.page--; renderTop(); } };
-  $("#next").onclick=()=>{ state.page++; renderTop(); };
+  document.getElementById("search").addEventListener("input", (e)=>{ state.query=(e.target.value||"").toLowerCase(); state.page=1; renderTop(); });
+  document.getElementById("sort").addEventListener("change", (e)=>{ state.sort=e.target.value; state.page=1; renderTop(); });
+  document.getElementById("pageSize").addEventListener("change", (e)=>{ state.pageSize=parseInt(e.target.value,10); state.page=1; renderTop(); });
+  document.getElementById("prev").onclick=()=>{ if(state.page>1){ state.page--; renderTop(); } };
+  document.getElementById("next").onclick=()=>{ state.page++; renderTop(); };
 
   // modal
-  $("#modalClose").onclick=()=>$("#modal").classList.remove("open");
-  $("#modal").addEventListener("click",(e)=>{ if(e.target.id==="modal") $("#modal").classList.remove("open"); });
+  document.getElementById("modalClose").onclick=()=>document.getElementById("modal").classList.remove("open");
+  document.getElementById("modal").addEventListener("click",(e)=>{ if(e.target.id==="modal") document.getElementById("modal").classList.remove("open"); });
 });
 </script>
 </body>
