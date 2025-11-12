@@ -1,374 +1,358 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Asistencia de Abdara</title>
-    
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Unifrakturka+Cook:wght@700&display=swap" rel="stylesheet">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Asistencia Abdara12</title>
 
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js'></script>
+<!-- Google Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 
-    <style>
-        /* --- 1. Definición de la Paleta (CSS Variables) --- */
-        :root {
-            --font-title: 'Unifrakturka Cook', cursive;
-            --font-body: 'Roboto', sans-serif;
+<!-- FullCalendar -->
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js"></script>
 
-            /* Paleta Dark Neon */
-            --color-bg-deep:   #0d0d0d; /* Fondo más oscuro (casi negro) */
-            --color-bg-medium: #1f1f1f; /* Header y Sidebar */
-            --color-bg-light:  #2a2a2a; /* Fondo del contenido */
-            --color-border:    #333333; /* Separadores */
-            
-            --color-text-primary:   #e0e0e0; /* Texto principal */
-            --color-text-secondary: #aaaaaa; /* Texto de la sidebar */
+<style>
+/* ================= ROOT COLORS ================= */
+:root{
+    --font-title: 'UnifrakturCook', cursive;
+    --font-body: 'Roboto', sans-serif;
 
-            /* Paleta Neón (de tu imagen) */
-            --color-neon-purple: #9f50ff;
-            --color-neon-magenta: #e13fff;
-            --color-neon-hover:  #4a0072; /* Morado oscuro para hovers */
+    --bg-deep: #080808;
+    --bg-mid: #111;
+    --bg-card: #181818;
+    --border: #282828;
 
-            /* Colores de Asistencia */
-            --color-normal: #28a745;
-            --color-tarde:  #ffc107;
-            --color-extra:  #007bff;
-        }
+    --text-primary: #e8e8e8;
+    --text-secondary: #9c9c9c;
 
-        /* --- 2. CSS Reset (Arreglo del Scrollbar) --- */
-        * {
-            box-sizing: border-box; /* Comportamiento de cajas predecible */
-        }
-        
-        body, html {
-            margin: 0;
-            padding: 0;
-            font-family: var(--font-body);
-            background-color: var(--color-bg-deep);
-            color: var(--color-text-primary);
-            height: 100%;
-            overflow: hidden; /* ¡Adiós al scrollbar principal! */
-        }
+    --neon-purple: #8d3aff;
+    --neon-pink: #ff38c7;
+    --neon-dark: #3a0061;
 
-        /* --- 3. Layout Principal (¡Con el arreglo definitivo!) --- */
-        #app-container {
-            display: grid;
-            grid-template-columns: 240px 1fr;
-            /* Fila 1 (Header): 60px. Fila 2 (Contenido): El resto, sin desbordar */
-            grid-template-rows: 60px minmax(0, 1fr);
-            grid-template-areas:
-                "header header"
-                "sidebar main";
-            height: 100%;
-        }
+    --green: #00ff8f;
+    --yellow: #f0ff45;
+    --blue: #00b7ff;
+}
 
-        /* --- 4. Header (Cabecera) --- */
-        #app-header {
-            grid-area: header;
-            background-color: var(--color-bg-medium);
-            color: white;
-            display: flex;
-            align-items: center;
-            padding: 0 20px;
-            border-bottom: 1px solid var(--color-border);
-        }
-        
-        #app-header h1 {
-            margin: 0;
-            font-family: var(--font-title);
-            font-size: 2.2em; /* Un poco más grande para el estilo */
-            
-            /* Gradiente Neón */
-            background-image: linear-gradient(to right, var(--color-neon-purple), var(--color-neon-magenta));
-            -webkit-background-clip: text;
-            background-clip: text;
-            color: transparent;
-            
-            /* Brillo Neón */
-            text-shadow: 0 0 5px var(--color-neon-purple), 0 0 10px var(--color-neon-purple);
-        }
-        
-        #logo-placeholder {
-            width: 40px;
-            height: 40px;
-            background-color: var(--color-neon-purple);
-            border-radius: 50%;
-            margin-right: 15px;
-            box-shadow: 0 0 10px var(--color-neon-purple); /* Brillo en el logo */
-        }
+/* ================= RESET ================= */
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
-        /* --- 5. Sidebar (Barra Lateral) --- */
-        #app-sidebar {
-            grid-area: sidebar;
-            background-color: var(--color-bg-medium);
-            color: var(--color-text-secondary);
-            padding: 20px;
-            border-right: 1px solid var(--color-border);
-        }
-        #app-sidebar h2 {
-            margin-top: 0;
-            color: white;
-            font-family: var(--font-title);
-            font-size: 1.8em;
-            text-align: center;
-            border-bottom: 1px solid var(--color-neon-hover);
-            padding-bottom: 10px;
-            text-shadow: 0 0 5px var(--color-neon-purple);
-        }
-        #app-sidebar ul { list-style: none; padding: 0; }
-        #app-sidebar li a {
-            display: block;
-            padding: 12px 15px;
-            text-decoration: none;
-            color: var(--color-text-secondary);
-            border-radius: 5px;
-            margin-bottom: 5px;
-            font-size: 1.1em;
-            cursor: pointer;
-            transition: background-color 0.3s ease, color 0.3s ease;
-        }
-        #app-sidebar li a:hover {
-            background-color: var(--color-neon-hover);
-            color: white;
-        }
+body{
+    height:100vh;
+    background: var(--bg-deep);
+    color:var(--text-primary);
+    font-family:var(--font-body);
+    overflow:hidden;
+}
 
-        /* --- 6. Contenido Principal --- */
-        #app-content {
-            grid-area: main;
-            padding: 30px;
-            overflow-y: auto; /* ¡Este es el scrollbar que SÍ queremos! */
-        }
-        
-        .vista-contenido {
-            background: var(--color-bg-light);
-            padding: 20px;
-            border-radius: 8px;
-            border: 1px solid var(--color-border);
-        }
+/* ================= GLOW FX ================= */
+.neonGlow{
+    text-shadow:
+    0 0 4px var(--neon-purple),
+    0 0 12px var(--neon-purple),
+    0 0 24px var(--neon-pink);
+}
 
-        /* --- 7. Estilos FullCalendar (Dark Mode Pro) --- */
-        .fc { --fc-border-color: var(--color-border); } /* Borde del calendario */
-        .fc .fc-toolbar-title { color: white; }
-        .fc .fc-daygrid-day-number { color: var(--color-text-primary); }
-        .fc .fc-col-header-cell-cushion { color: var(--color-text-secondary); }
-        .fc .fc-button {
-            background-color: var(--color-neon-hover);
-            border-color: var(--color-neon-hover);
-            transition: background-color 0.3s ease;
-        }
-        .fc .fc-button:hover { background-color: var(--color-neon-purple); }
-        .fc .fc-day-today { background-color: #333333; } /* Color para "Hoy" */
+/* ================= LAYOUT ================= */
+#app{
+    display:grid;
+    grid-template-columns:240px 1fr;
+    grid-template-rows:72px 1fr;
+    grid-template-areas:
+        "header header"
+        "sidebar main";
+    height:100%;
+}
 
-        /* Día con Stream (Solo fondo, como pediste) */
-        .fc-day-with-stream {
-            background-color: #3a0061 !important; /* Morado oscuro */
-            cursor: pointer;
-            transition: background-color 0.3s ease;
-        }
-        .fc-day-with-stream:hover {
-            background-color: var(--color-neon-hover) !important; /* Más claro al pasar */
-        }
+/* ================= HEADER ================= */
+header{
+    grid-area:header;
+    display:flex;
+    align-items:center;
+    padding:0 24px;
+    background:var(--bg-mid);
+    border-bottom:1px solid var(--border);
+}
 
-        /* --- 8. Vista de Detalles --- */
-        #vista-detalles h2 { margin-top: 0; color: white; }
-        #btn-volver {
-            background: #6c757d; color: white; border: none;
-            padding: 10px 15px; border-radius: 5px; cursor: pointer;
-            font-size: 1em; margin-bottom: 20px;
-            transition: background-color 0.3s ease;
-        }
-        #btn-volver:hover { background: #5a6268; }
-        #detalles-lista { list-style-type: none; padding: 0; }
-        #detalles-lista li {
-            padding: 12px 10px;
-            border-bottom: 1px solid var(--color-border);
-            font-size: 1.1em;
-        }
-        #detalles-lista li:last-child { border-bottom: none; }
-        #detalles-lista .tipo-normal { color: var(--color-normal); font-weight: bold; }
-        #detalles-lista .tipo-tarde  { color: var(--color-tarde); font-weight: bold; }
-        #detalles-lista .tipo-extra  { color: var(--color-extra); font-weight: bold; }
-    </style>
+header h1{
+    font-family:var(--font-title);
+    font-size:2.4rem;
+    background:linear-gradient(90deg, var(--neon-purple), var(--neon-pink));
+    -webkit-background-clip:text;
+    color:transparent;
+    text-shadow:0 0 10px var(--neon-purple);
+    animation:fadeDown .7s ease;
+}
+
+/* ================= SIDEBAR ================= */
+aside{
+    grid-area:sidebar;
+    padding:24px;
+    background:var(--bg-mid);
+    border-right:1px solid var(--border);
+    animation:fadeLeft .6s ease;
+}
+
+aside h2{
+    font-family:var(--font-title);
+    text-align:center;
+    color:var(--neon-purple);
+    margin-bottom:12px;
+    font-size:1.8rem;
+    text-shadow:0 0 6px var(--neon-purple);
+}
+
+aside ul{
+    list-style:none;
+    margin-top:16px;
+}
+
+aside li a{
+    display:block;
+    padding:10px 14px;
+    background:#131313;
+    color:var(--text-secondary);
+    border:1px solid var(--border);
+    border-radius:6px;
+    margin-bottom:10px;
+    cursor:pointer;
+    transition:.25s;
+}
+
+aside li a:hover{
+    background:var(--neon-dark);
+    color:white;
+    box-shadow:0 0 12px var(--neon-purple);
+}
+
+/* ================= MAIN ================= */
+main{
+    grid-area:main;
+    padding:28px;
+    overflow-y:auto;
+    background:var(--bg-deep);
+    animation:fade .5s ease;
+}
+
+.card{
+    background:var(--bg-card);
+    border:1px solid var(--border);
+    padding:20px;
+    border-radius:10px;
+    animation:fade .5s ease;
+}
+
+/* ================= FULLCALENDAR ================= */
+.fc{
+    --fc-border-color:var(--border);
+}
+.fc .fc-toolbar-title{
+    color:var(--neon-purple);
+    font-family:var(--font-title);
+    text-shadow:0 0 10px var(--neon-purple);
+}
+.fc-button{
+    background:var(--neon-dark) !important;
+    border:none !important;
+    color:white !important;
+    transition:.3s;
+}
+.fc-button:hover{
+    background:var(--neon-purple) !important;
+    box-shadow:0 0 10px var(--neon-purple);
+}
+.fc-daygrid-day-number{
+    color:var(--text-primary);
+}
+.fc-col-header-cell{
+    color:var(--text-secondary);
+}
+
+/* DÍAS CON STREAM */
+.fc-day-with-stream{
+    background:#300052 !important;
+    transition:.3s;
+}
+.fc-day-with-stream:hover{
+    background:#52008a !important;
+    box-shadow:inset 0 0 12px var(--neon-purple);
+}
+
+/* ================= ANIMACIONES ================= */
+@keyframes fade{
+    0%{ opacity:0; }
+    100%{ opacity:1; }
+}
+@keyframes fadeLeft{
+    0%{ opacity:0; transform:translateX(-40px); }
+    100%{ opacity:1; transform:translateX(0); }
+}
+@keyframes fadeDown{
+    0%{ opacity:0; transform:translateY(-30px); }
+    100%{ opacity:1; transform:translateY(0); }
+}
+</style>
 </head>
+
 <body>
 
-    <div id="app-container">
-        
-        <header id="app-header">
-            <div id="logo-placeholder"></div>
-            <h1>Calendario de Asistencia Abdara 12</h1>
-        </header>
+<audio id="sfx" src="https://cdn.freesound.org/previews/656/656770_1648170-lq.mp3"></audio>
 
-        <aside id="app-sidebar">
-            <h2>Navegación</h2>
-            <ul>
-                <li><a id="link-calendario">Calendario</a></li>
-                <li><a id="link-top3">Top 3 Asistencias</a></li>
-            </ul>
-        </aside>
+<div id="app">
 
-        <main id="app-content">
+    <!-- HEADER -->
+    <header>
+        <h1 class="neonGlow">Calendario de Asistencia Abdara12</h1>
+    </header>
 
-            <div id="vista-calendario" class="vista-contenido">
-                </div>
+    <!-- SIDEBAR -->
+    <aside>
+        <h2>Navegación</h2>
+        <ul>
+            <li><a id="link-calendario">Calendario</a></li>
+            <li><a id="link-top">Top 3</a></li>
+        </ul>
+    </aside>
 
-            <div id="vista-detalles" class="vista-contenido" style="display: none;">
-                <button id="btn-volver">&larr; Volver al Calendario</button>
-                <h2 id="detalles-titulo"></h2>
-                <ul id="detalles-lista"></ul>
-            </div>
+    <!-- MAIN -->
+    <main>
+        <div id="vista-calendario" class="card"></div>
 
-            <div id="vista-top3" class="vista-contenido" style="display: none;">
-                <button id="btn-volver-top3">&larr; Volver al Calendario</button>
-                <h2>Top 3 Asistencias</h2>
-                <ul id="listaTop3"></ul>
-            </div>
+        <div id="vista-detalles" class="card" style="display:none">
+            <button id="volver">&larr; Volver</button>
+            <h2 id="titulo-detalle"></h2>
+            <ul id="listado"></ul>
+        </div>
 
-        </main>
-    </div>
+        <div id="vista-top" class="card" style="display:none">
+            <button id="volverTop">&larr; Volver</button>
+            <h2 class="neonGlow">Top 3 Asistencias</h2>
+            <ul id="listaTop3"></ul>
+        </div>
 
-    <script>
-        // --- CONFIGURACIÓN ---
-        const API_URL = "https://script.google.com/macros/s/AKfycbx6WjqODhuetXMwsAtzfvXY539Quj1exnRz7s7J6FQBH2UAlag6Brs6InxPsRS3uq2F/exec?webAction=get_all_data";
-        const TIME_ZONE = "America/Guatemala"; // GTM-6
+    </main>
+</div>
 
-        // --- LÓGICA DE LA APP ---
+<script>
+/* ===================== CONFIG ===================== */
+const API_URL =
+"https://script.google.com/macros/s/AKfycbx6WjqODhuetXMwsAtzfvXY539Quj1exnRz7s7J6FQBH2UAlag6Brs6InxPsRS3uq2F/exec?webAction=get_all_data";
+const ZONE = "America/Guatemala";
+let DATOS_STREAM, DATOS_ASIST;
 
-        function mostrarVista(vistaId) {
-            document.getElementById('vista-calendario').style.display = 'none';
-            document.getElementById('vista-detalles').style.display = 'none';
-            document.getElementById('vista-top3').style.display = 'none';
-            
-            document.getElementById(vistaId).style.display = 'block';
-        }
+/* ===================== UTILS ===================== */
+function show(id){
+    document.getElementById("vista-calendario").style.display="none";
+    document.getElementById("vista-detalles").style.display="none";
+    document.getElementById("vista-top").style.display="none";
+    document.getElementById(id).style.display="block";
+}
 
-        document.addEventListener("DOMContentLoaded", () => {
-            cargarDatos();
+/* ===================== SFX ===================== */
+function playSFX(){
+    const s = document.getElementById("sfx");
+    s.volume = 0.35;
+    s.currentTime = 0;
+    s.play();
+}
 
-            document.getElementById('link-calendario').addEventListener('click', () => mostrarVista('vista-calendario'));
-            
-            document.getElementById('link-top3').addEventListener('click', () => {
-                prepararBotonTop3(window.datosAsistencia); 
-                mostrarVista('vista-top3'); 
+/* ===================== INIT ===================== */
+document.addEventListener("DOMContentLoaded", ()=>{
+    loadData();
+
+    document.getElementById("link-calendario").onclick=()=>show("vista-calendario");
+    document.getElementById("link-top").onclick=()=>{
+        fillTop();
+        show("vista-top");
+        playSFX();
+    };
+    document.getElementById("volver").onclick=()=>show("vista-calendario");
+    document.getElementById("volverTop").onclick=()=>show("vista-calendario");
+});
+
+/* ===================== GET DATA ===================== */
+async function loadData(){
+    const r = await fetch(API_URL);
+    const d = await r.json();
+    DATOS_STREAM = d.streams;
+    DATOS_ASIST = d.asistencia;
+    renderCalendar();
+}
+
+/* ===================== CALENDAR ===================== */
+function renderCalendar(){
+    const el = document.getElementById("vista-calendario");
+
+    const calendar = new FullCalendar.Calendar(el,{
+        initialView: "dayGridMonth",
+        locale:"es",
+        timeZone:ZONE,
+        headerToolbar:{
+            left:"prev,next today",
+            center:"title",
+            right:"dayGridMonth,timeGridWeek"
+        },
+
+        dayCellDidMount(arg){
+            const f = arg.date.toISOString().split("T")[0];
+            if(DATOS_STREAM[f]) arg.el.classList.add("fc-day-with-stream");
+        },
+
+        dateClick(info){
+            const f = info.dateStr;
+            if(!DATOS_STREAM[f]) return;
+
+            const list = DATOS_ASIST.filter(a=>{
+                const fa = new Date(a[0]).toLocaleDateString("en-CA",{timeZone:ZONE});
+                return fa===f;
             });
 
-            document.getElementById('btn-volver').addEventListener('click', () => mostrarVista('vista-calendario'));
-            document.getElementById('btn-volver-top3').addEventListener('click', () => mostrarVista('vista-calendario'));
-        });
+            document.getElementById("titulo-detalle").innerText=`Asistencias ${f}`;
+            const ul = document.getElementById("listado");
+            ul.innerHTML="";
 
-        async function cargarDatos() {
-            try {
-                const response = await fetch(API_URL);
-                const data = await response.json();
-                
-                console.log("Datos recibidos:", data);
-                
-                window.datosAsistencia = data.asistencia; 
-                window.datosStreams = data.streams;
+            list.length
+            ? list.forEach(a=>{
+                const li=document.createElement("li");
+                li.textContent=`${a[1]} (${a[2]})`;
+                ul.appendChild(li);
+            })
+            : ul.innerHTML="<li>Sin registros</li>";
 
-                renderizarCalendario(data.streams, data.asistencia);
-
-            } catch (error) {
-                console.error("Error al cargar los datos:", error);
-                document.getElementById("vista-calendario").innerHTML = "<p>Error al cargar los datos.</p>";
-            }
+            show("vista-detalles");
+            playSFX();
         }
+    });
 
-        // --- FUNCIÓN DEL CALENDARIO ---
-        function renderizarCalendario(streams, asistencias) {
-            const calendarioEl = document.getElementById('vista-calendario');
-            
-            const calendar = new FullCalendar.Calendar(calendarioEl, {
-                initialView: 'dayGridMonth',
-                locale: 'es',
-                timeZone: TIME_ZONE,
-                headerToolbar: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: 'dayGridMonth,timeGridWeek'
-                },
-                
-                dayCellDidMount: function(arg) {
-                    const fechaSimple = arg.date.toISOString().split('T')[0];
-                    if (streams[fechaSimple]) {
-                        arg.el.classList.add('fc-day-with-stream');
-                    }
-                },
-                
-                dateClick: function(info) {
-                    const fechaSimpleClick = info.dateStr;
+    calendar.render();
+}
 
-                    if (!streams[fechaSimpleClick]) {
-                        return;
-                    }
-                    
-                    const asistenciasDelDia = asistencias.filter(a => {
-                        const fechaAsistencia = new Date(a[0]).toLocaleDateString('en-CA', { timeZone: TIME_ZONE });
-                        return fechaAsistencia === fechaSimpleClick;
-                    });
-                    
-                    document.getElementById('detalles-titulo').innerText = `Asistencias del ${fechaSimpleClick}`;
-                    const listaEl = document.getElementById('detalles-lista');
-                    listaEl.innerHTML = ""; 
-
-                    if (asistenciasDelDia.length > 0) {
-                        asistenciasDelDia.forEach(a => {
-                            const usuario = a[1];
-                            const tipo = a[2]; 
-                            const li = document.createElement("li");
-                            li.innerHTML = `${usuario} <span class="tipo-${tipo}">(${tipo})</span>`;
-                            listaEl.appendChild(li);
-                        });
-                    } else {
-                        listaEl.innerHTML = "<li>No se registraron asistencias.</li>";
-                    }
-                    
-                    mostrarVista('vista-detalles');
-                }
-            });
-
-            calendar.render();
+/* ===================== TOP ===================== */
+function fillTop(){
+    const count={};
+    DATOS_ASIST.forEach(r=>{
+        if(r[2]==="normal" || r[2]==="tarde"){
+            count[r[1]] = (count[r[1]]||0)+1;
         }
+    });
 
-        // --- FUNCIÓN DEL TOP 3 ---
-        function prepararBotonTop3(asistencias) {
-            const conteo = {};
-            
-            if (!asistencias) {
-                document.getElementById("listaTop3").innerHTML = "<li>Datos no cargados.</li>";
-                return;
-            }
+    const top = Object.entries(count).sort((a,b)=>b[1]-a[1]).slice(0,3);
+    const list = document.getElementById("listaTop3");
+    list.innerHTML="";
 
-            asistencias.forEach(registro => {
-                const usuario = registro[1];
-                const tipo = registro[2];
-                
-                if (tipo === "normal" || tipo === "tarde") {
-                    conteo[usuario] = (conteo[usuario] || 0) + 1;
-                }
-            });
-            
-            const arrayConteo = Object.entries(conteo);
-            arrayConteo.sort((a, b) => b[1] - a[1]);
-            const top3 = arrayConteo.slice(0, 3);
-            
-            const listaEl = document.getElementById("listaTop3");
-            listaEl.innerHTML = ""; 
-            
-            if (top3.length === 0) {
-                 listaEl.innerHTML = "<li>Aún no hay asistencias para mostrar.</li>";
-                 return;
-            }
+    top.forEach(u=>{
+        const li=document.createElement("li");
+        li.textContent=`${u[0]} (${u[1]})`;
+        list.appendChild(li);
+    });
+}
+</script>
 
-            top3.forEach(item => {
-                const li = document.createElement("li");
-                li.textContent = `${item[0]} (${item[1]} asistencias)`;
-                listaEl.appendChild(li);
-            });
-        }
-
-    </script>
 </body>
 </html>
