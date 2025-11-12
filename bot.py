@@ -15,7 +15,7 @@ CHANNEL = "abdara12"
 BROADCASTER_ID = "930537744"  # ID numérico del streamer
 
 # URL de Google Apps Script (¡Pega la nueva URL de la implementación!)
-GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwsV6Ken1I38qcRsKrYCqa0r5qozVFp0yhGFThe8MiJ0WASFdup5pn0Myxbp-AJ9zR6/exec"
+GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwTSpuVtXlGty8SrA6s1W5zHkeLdPIBSWLGe__OuilX1MamNowX-p33s6nMzsPMbIvj/exec"
 
 
 # ==========================
@@ -155,3 +155,4 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         print("\nCerrando bot...")
+
