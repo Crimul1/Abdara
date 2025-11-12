@@ -11,13 +11,14 @@ CLIENT_ID = "u4jxn8cgm5ki14grzcmedwc8yh5pr5"
 
 # Info del Canal
 BOT_NAME = "crimul_bot"
-CHANNEL = "abdara12"
+CHANNEL = "crimul_taquita"
 BROADCASTER_ID = "930537744"  # ID numérico del streamer
 
-# URL de Google Apps Script (¡Pega la nueva URL de la implementación!)
-GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwTSpuVtXlGty8SrA6s1W5zHkeLdPIBSWLGe__OuilX1MamNowX-p33s6nMzsPMbIvj/exec"
+# URL de Google Apps Script (¡Verifica que sea la tuya!)
+GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwRLrjylJOxArnAjywtX39XPVY1aY49QYoxvJq_INVoEMl9kLssS-EH5PtUYfHAYYlc/exec"
 
-
+# Tiempo de chequeo de API (en segundos)
+POLL_INTERVAL = 300  # 300 segundos = 5 minutos
 # ==========================
 
 
@@ -50,8 +51,6 @@ async def connect_to_chat():
                         print(f"  (Chat) {username}: {text}")
 
                         # --- Lógica de Comandos ---
-
-                        # _AQUÍ ESTÁ LA CORRECCIÓN_ (se usa paréntesis)
                         if text.startswith("!asistencia"):
                             print(f"⚡ (Chat) Registrando !asistencia para {username}")
                             try:
@@ -62,7 +61,6 @@ async def connect_to_chat():
                             except requests.RequestException as e:
                                 print(f"ERROR al enviar !asistencia: {e}")
 
-                        # Este se queda con '==' para no confundirse con el de arriba
                         elif text == "!asistenciaextra":
                             print(f"⚡ (Chat) Registrando !asistenciaextra para {username}")
                             try:
@@ -74,7 +72,7 @@ async def connect_to_chat():
                                 print(f"ERROR al enviar !asistenciaextra: {e}")
 
         except websockets.exceptions.ConnectionClosed:
-            print("⚠️ (Chat) Conexión perdida. Reconectando en 10 segundos...")
+            print(f"⚠️ (Chat) Conexión perdida. Reconectando en 10 segundos...")
             await asyncio.sleep(10)
         except Exception as e:
             print(f"⚠️ (Chat) Error inesperado: {e}. Reconectando en 10 segundos...")
@@ -118,10 +116,9 @@ async def poll_stream_status():
 
             elif r.status_code == 401:
                 print("Error 401: Token (APP_TOKEN) inválido o expirado.")
-
-            # _AQUÍ ESTÁ EL CAMBIO_ (5 minutos)
-            print("  (API) Chequeo realizado. Próximo chequeo en 1 minuto.")
-            await asyncio.sleep(60)
+            
+            print(f"  (API) Chequeo realizado. Próximo chequeo en {POLL_INTERVAL} segundos.")
+            await asyncio.sleep(POLL_INTERVAL)
 
         except requests.RequestException as e:
             print(f"⚠️ (API) Error de conexión al consultar API: {e}. Reintentando en 60s.")
@@ -155,4 +152,3 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         print("\nCerrando bot...")
-
