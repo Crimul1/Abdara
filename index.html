@@ -4,96 +4,216 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Asistencia de Abdara</title>
+    
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js'></script>
+
     <style>
-        body {
+        /* --- Reseteo básico --- */
+        body, html {
+            margin: 0;
+            padding: 0;
             font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 20px;
-            color: #333;
+            background-color: #f0f2f5; /* Un gris muy claro para el fondo */
+            height: 100%;
         }
-        .container {
-            max-width: 900px;
-            margin: 0 auto;
-            background: #fff;
+
+        /* --- El Layout principal (CSS Grid) --- */
+        #app-container {
+            display: grid;
+            grid-template-columns: 240px 1fr; /* Sidebar de 240px, resto para contenido */
+            grid-template-rows: 60px 1fr; /* Header de 60px, resto para contenido */
+            grid-template-areas:
+                "header header"
+                "sidebar main";
+            height: 100vh; /* Ocupar toda la altura de la pantalla */
+        }
+
+        /* --- 1. Header (Cabecera) --- */
+        #app-header {
+            grid-area: header;
+            background-color: #ffffff; /* Fondo blanco para el header */
+            color: #333;
+            display: flex;
+            align-items: center;
+            padding: 0 20px;
+            border-bottom: 1px solid #ddd;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+        }
+        #app-header h1 {
+            margin: 0;
+            font-size: 1.5em;
+        }
+        /* (Opcional) Aquí puedes poner tu logo */
+        #logo-placeholder {
+            width: 40px;
+            height: 40px;
+            background-color: #4a0072; /* Morado oscuro */
+            border-radius: 50%;
+            margin-right: 15px;
+            /* background-image: url('URL_DE_TU_LOGO.png'); */
+        }
+
+        /* --- 2. Sidebar (Lateral) --- */
+        #app-sidebar {
+            grid-area: sidebar;
+            background-color: #3a0061; /* Morado oscuro (fondo) */
+            color: #e0e0e0; /* Texto claro */
+            padding: 20px;
+        }
+        #app-sidebar h2 {
+            margin-top: 0;
+            color: white;
+            border-bottom: 1px solid #7b1fa2;
+            padding-bottom: 10px;
+        }
+        #app-sidebar ul {
+            list-style: none;
+            padding: 0;
+        }
+        #app-sidebar li a {
+            display: block;
+            padding: 12px 15px;
+            text-decoration: none;
+            color: #e0e0e0;
+            border-radius: 5px;
+            margin-bottom: 5px;
+            font-size: 1.1em;
+            cursor: pointer;
+        }
+        #app-sidebar li a:hover {
+            background-color: #4a0072; /* Morado más intenso */
+            color: white;
+        }
+
+        /* --- 3. Main Content (Contenido Principal) --- */
+        #app-content {
+            grid-area: main;
+            padding: 30px;
+            overflow-y: auto; /* Scroll si el contenido es muy largo */
+        }
+        
+        .vista-contenido {
+            background: #ffffff;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        h1, h2 {
-            text-align: center;
+
+        /* --- Estilos para la vista de Detalles --- */
+        #vista-detalles h2 {
+            margin-top: 0;
         }
-        
-        /* Estilos del Calendario */
-        #calendario {
+        #btn-volver {
+            background: #6c757d;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
             margin-bottom: 20px;
         }
-        /* Color para días con stream */
+        #btn-volver:hover {
+            background: #5a6268;
+        }
+        #detalles-lista {
+            list-style-type: none;
+            padding: 0;
+        }
+        #detalles-lista li {
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            font-size: 1.1em;
+        }
+        #detalles-lista li:last-child {
+            border-bottom: none;
+        }
+        #detalles-lista .tipo-normal { color: #28a745; }
+        #detalles-lista .tipo-tarde { color: #ffc107; }
+        #detalles-lista .tipo-extra { color: #007bff; }
+
+        /* --- Colores del Calendario --- */
         .fc-day-with-stream {
             background-color: #e0f7fa !important;
             cursor: pointer;
         }
-        
-        /* Estilos del Top 3 */
-        #btnTop3 {
-            display: block;
-            margin: 10px auto;
-            padding: 10px 15px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #007bff;
-            color: white;
-            border: none;
-            border-radius: 5px;
+        .fc-day-with-stream:hover {
+            background-color: #b2ebf2 !important;
         }
-        #listaTop3 {
-            list-style-type: decimal;
-            padding-left: 30px;
-        }
-        #listaTop3 li {
-            font-size: 1.1em;
-            margin-bottom: 5px;
-        }
-
     </style>
-    
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js'></script>
 </head>
 <body>
 
-    <div class="container">
-        <h1>Calendario de Asistencia</h1>
-        <div id="calendario">
-            <p>Cargando calendario...</p>
-        </div>
-    </div>
+    <div id="app-container">
+        
+        <header id="app-header">
+            <div id="logo-placeholder"></div>
+            <h1>Calendario de Asistencia Abdara12</h1>
+        </header>
 
-    <div class="container" id="top3">
-        <h2>Top 3 Asistencias</h2>
-        <button id="btnTop3">Mostrar Top 3</button>
-        <ul id="listaTop3">
-            </ul>
+        <aside id="app-sidebar">
+            <h2>Navegación</h2>
+            <ul>
+                <li><a id="link-calendario">Calendario</a></li>
+                <li><a id="link-top3">Top 3 Asistencias</a></li>
+                </ul>
+        </aside>
+
+        <main id="app-content">
+
+            <div id="vista-calendario" class="vista-contenido">
+                </div>
+
+            <div id="vista-detalles" class="vista-contenido" style="display: none;">
+                <button id="btn-volver">&larr; Volver al Calendario</button>
+                <h2 id="detalles-titulo"></h2>
+                <ul id="detalles-lista">
+                    </ul>
+            </div>
+
+            <div id="vista-top3" class="vista-contenido" style="display: none;">
+                <button id="btn-volver-top3">&larr; Volver al Calendario</button>
+                <h2>Top 3 Asistencias</h2>
+                <ul id="listaTop3">
+                    </ul>
+            </div>
+
+        </main>
     </div>
 
     <script>
         // --- CONFIGURACIÓN ---
         const API_URL = "https://script.google.com/macros/s/AKfycbx6WjqODhuetXMwsAtzfvXY539Quj1exnRz7s7J6FQBH2UAlag6Brs6InxPsRS3uq2F/exec?webAction=get_all_data";
-        
-        // Zona horaria para GTM-6 (ej: Guatemala)
-        const TIME_ZONE = "America/Guatemala"; 
+        const TIME_ZONE = "America/Guatemala"; // GTM-6
 
-        // --- LÓGICA DE LA WEB ---
+        // --- LÓGICA DE LA APP ---
 
+        // Función global para cambiar entre "vistas"
+        function mostrarVista(vistaId) {
+            document.getElementById('vista-calendario').style.display = 'none';
+            document.getElementById('vista-detalles').style.display = 'none';
+            document.getElementById('vista-top3').style.display = 'none';
+            
+            document.getElementById(vistaId).style.display = 'block';
+        }
+
+        // 1. Esperar a que la página cargue
         document.addEventListener("DOMContentLoaded", () => {
             cargarDatos();
-            // Asignar el evento al botón
-            document.getElementById("btnTop3").addEventListener("click", () => {
-                // Hacemos esto para no tener que recargar los datos
-                if (window.datosAsistencia) {
-                    prepararBotonTop3(window.datosAsistencia);
-                }
+
+            // Asignar eventos a los botones de navegación
+            document.getElementById('link-calendario').addEventListener('click', () => mostrarVista('vista-calendario'));
+            
+            document.getElementById('link-top3').addEventListener('click', () => {
+                prepararBotonTop3(window.datosAsistencia); // Llenar la lista
+                mostrarVista('vista-top3'); // Mostrar la vista
             });
+
+            document.getElementById('btn-volver').addEventListener('click', () => mostrarVista('vista-calendario'));
+            document.getElementById('btn-volver-top3').addEventListener('click', () => mostrarVista('vista-calendario'));
         });
 
+        // 2. Función para traer los datos del Google Sheet
         async function cargarDatos() {
             try {
                 const response = await fetch(API_URL);
@@ -101,46 +221,44 @@
                 
                 console.log("Datos recibidos:", data);
                 
-                // Guardamos los datos globalmente para usarlos en el botón
+                // Guardamos los datos globalmente
                 window.datosAsistencia = data.asistencia; 
+                window.datosStreams = data.streams;
 
-                // Ahora sí, llamamos a las funciones que dibujan
+                // Dibujar el calendario
                 renderizarCalendario(data.streams, data.asistencia);
 
             } catch (error) {
                 console.error("Error al cargar los datos:", error);
-                document.getElementById("calendario").innerHTML = "<p>Error al cargar los datos.</p>";
+                document.getElementById("vista-calendario").innerHTML = "<p>Error al cargar los datos.</p>";
             }
         }
 
         // --- FUNCIÓN DEL CALENDARIO ---
         function renderizarCalendario(streams, asistencias) {
-            const calendarioEl = document.getElementById('calendario');
+            const calendarioEl = document.getElementById('vista-calendario');
             
-            // Procesamos los eventos para FullCalendar
             const eventos = [];
             for (const date in streams) {
                 eventos.push({
                     title: 'Stream',
-                    start: streams[date].startTimeUTC, // FullCalendar entiende UTC
+                    start: streams[date].startTimeUTC, 
                     allDay: false,
-                    // Guardamos la fecha (YYYY-MM-DD) para buscarla luego
                     fechaSimple: date 
                 });
             }
 
             const calendar = new FullCalendar.Calendar(calendarioEl, {
-                initialView: 'dayGridMonth', // Vista mensual
-                locale: 'es', // En español
-                timeZone: TIME_ZONE, // Mostrar horas en GTM-6
+                initialView: 'dayGridMonth',
+                locale: 'es',
+                timeZone: TIME_ZONE,
                 headerToolbar: {
                     left: 'prev,next today',
                     center: 'title',
                     right: 'dayGridMonth,timeGridWeek'
                 },
-                events: eventos, // Los streams que procesamos
+                events: eventos,
 
-                // Pintar los días que hubo stream
                 dayCellDidMount: function(arg) {
                     const fechaSimple = arg.date.toISOString().split('T')[0];
                     if (streams[fechaSimple]) {
@@ -148,32 +266,39 @@
                     }
                 },
                 
+                // --- ¡AQUÍ ESTÁ EL CAMBIO! ---
                 // Al hacer clic en un día
                 dateClick: function(info) {
                     // Si el día no tuvo stream, no hacer nada
                     if (!streams[info.dateStr]) {
-                        alert("No hubo stream ese día.");
                         return;
                     }
                     
                     // Buscar asistencias de ESE día
-                    // info.dateStr es la fecha YYYY-MM-DD
                     const asistenciasDelDia = asistencias.filter(a => {
-                        // Convertimos el timestamp UTC a la fecha GTM-6
                         const fechaAsistencia = new Date(a[0]).toLocaleDateString('en-CA', { timeZone: TIME_ZONE });
                         return fechaAsistencia === info.dateStr;
                     });
                     
-                    let resumen = `Asistencias del ${info.dateStr}:\n\n`;
+                    // Llenar la nueva vista
+                    document.getElementById('detalles-titulo').innerText = `Asistencias del ${info.dateStr}`;
+                    const listaEl = document.getElementById('detalles-lista');
+                    listaEl.innerHTML = ""; // Limpiar
+
                     if (asistenciasDelDia.length > 0) {
                         asistenciasDelDia.forEach(a => {
-                            // a[1] = usuario, a[2] = tipo
-                            resumen += `• ${a[1]} (${a[2]})\n`; 
+                            const usuario = a[1];
+                            const tipo = a[2]; // "normal", "tarde", "extra"
+                            const li = document.createElement("li");
+                            li.innerHTML = `${usuario} <span class="tipo-${tipo}">(${tipo})</span>`;
+                            listaEl.appendChild(li);
                         });
                     } else {
-                        resumen += "No se registraron asistencias.";
+                        listaEl.innerHTML = "<li>No se registraron asistencias.</li>";
                     }
-                    alert(resumen); // Mostramos un simple alert
+                    
+                    // Mostrar la vista de detalles
+                    mostrarVista('vista-detalles');
                 }
             });
 
@@ -182,34 +307,28 @@
 
         // --- FUNCIÓN DEL TOP 3 ---
         function prepararBotonTop3(asistencias) {
-            const conteo = {}; // { "usuario": 10, "otro_usuario": 5 }
+            const conteo = {};
             
+            if (!asistencias) {
+                document.getElementById("listaTop3").innerHTML = "<li>Datos no cargados.</li>";
+                return;
+            }
+
             asistencias.forEach(registro => {
                 const usuario = registro[1];
                 const tipo = registro[2];
                 
-                // Solo contamos "normal" y "tarde" (excluimos "extra")
                 if (tipo === "normal" || tipo === "tarde") {
-                    if (conteo[usuario]) {
-                        conteo[usuario]++;
-                    } else {
-                        conteo[usuario] = 1;
-                    }
+                    conteo[usuario] = (conteo[usuario] || 0) + 1;
                 }
             });
             
-            // Convertir el objeto a un array para ordenarlo
-            const arrayConteo = Object.entries(conteo); // [ ["usuario", 10], ["otro", 5] ]
-            
-            // Ordenar de mayor a menor
+            const arrayConteo = Object.entries(conteo);
             arrayConteo.sort((a, b) => b[1] - a[1]);
-            
-            // Tomar los 3 primeros
             const top3 = arrayConteo.slice(0, 3);
             
-            // Mostrar en la web
             const listaEl = document.getElementById("listaTop3");
-            listaEl.innerHTML = ""; // Limpiar lista anterior
+            listaEl.innerHTML = ""; // Limpiar
             
             if (top3.length === 0) {
                  listaEl.innerHTML = "<li>Aún no hay asistencias para mostrar.</li>";
@@ -217,10 +336,8 @@
             }
 
             top3.forEach(item => {
-                const usuario = item[0];
-                const total = item[1];
                 const li = document.createElement("li");
-                li.textContent = `${usuario} (${total} asistencias)`;
+                li.textContent = `${item[0]} (${item[1]} asistencias)`;
                 listaEl.appendChild(li);
             });
         }
