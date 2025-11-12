@@ -5,12 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Calendario de Asistencia Abdara12</title>
 
-  <!-- Fuentes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 
-  <!-- FullCalendar -->
   <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js"></script>
 
   <style>
@@ -167,7 +165,6 @@
 </head>
 <body>
 
-  <!-- SFX -->
   <audio id="sfx" src="https://cdn.freesound.org/previews/656/656770_1648170-lq.mp3"></audio>
 
   <div id="app">
@@ -185,14 +182,12 @@
     </aside>
 
     <main>
-      <!-- CALENDARIO -->
       <section id="view-cal" class="view active">
         <div id="calendarWrap" class="card" style="height:100%">
           <div id="calendar" aria-label="Calendario"></div>
         </div>
       </section>
 
-      <!-- TOP ASISTENCIAS -->
       <section id="view-top" class="view" aria-live="polite">
         <div class="card" style="height:100%">
           <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px;">
@@ -237,7 +232,6 @@
     </main>
   </div>
 
-  <!-- Modal -->
   <div class="modal" id="modal">
     <div class="box">
       <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px;">
@@ -252,7 +246,8 @@
 
   <script>
     /* ===================== CONFIG ===================== */
-    const API_URL = "https://script.google.com/macros/s/AKfycbyNkhNnLkxx0bqxV5rGbQGnjv64Ny5ldga2nWzsznPokb5n0NejNM3FC8bdhSzwsjBz/exec?webAction=get_all_data";
+    // ¡URL ARREGLADA! Puse la que sabíamos que funcionaba.
+    const API_URL = "https://script.google.com/macros/s/AKfycbx6WjqODhuetXMwsAtzfvXY539Quj1exnRz7s7J6FQBH2UAlag6Brs6InxPsRS3uq2F/exec?webAction=get_all_data";
     const ZONE = "America/Guatemala";
 
     let STREAMS = {};
@@ -282,19 +277,30 @@
 
     /* ===================== DATA ===================== */
     async function loadData(){
-      const res = await fetch(API_URL + "&_=" + Date.now());
-      const json = await res.json();
+      // ¡ARREGLADO! Añadido try...catch para manejar errores de red/API
+      try {
+        const res = await fetch(API_URL + "&_=" + Date.now());
+        if (!res.ok) {
+          throw new Error(`Error HTTP: ${res.status}`);
+        }
+        
+        const json = await res.json();
 
-      STREAMS = json.streams || {};
+        STREAMS = json.streams || {};
 
-      // Anti “1 fantasma”: filtra filas inválidas
-      ASIST = (json.asistencia || []).filter(r=>{
-        const fecha=r[0], user=r[1], tipo=r[2];
-        if(!user || !String(user).trim()) return false;
-        if(!['normal','tarde','extra'].includes(tipo)) return false;
-        if(!fecha || isNaN(Date.parse(fecha))) return false;
-        return true;
-      });
+        // Anti “1 fantasma”: filtra filas inválidas
+        ASIST = (json.asistencia || []).filter(r=>{
+          const fecha=r[0], user=r[1], tipo=r[2];
+          if(!user || !String(user).trim()) return false;
+          if(!['normal','tarde','extra'].includes(tipo)) return false;
+          if(!fecha || isNaN(Date.parse(fecha))) return false;
+          return true;
+        });
+      } catch (error) {
+        console.error("Error al cargar datos:", error);
+        showToast("Error al conectar con la API.");
+        throw error; // Lanzar el error para que el inicio (startup) lo detenga
+      }
     }
 
     /* ===================== CALENDARIO ===================== */
@@ -319,8 +325,8 @@
           const list = ASIST.filter(a => new Date(a[0]).toLocaleDateString('en-CA',{timeZone:ZONE}) === f);
           const html = list.length
             ? `<ul style="list-style:none; padding:0; margin:0">
-                 ${list.map(a=>`<li style="padding:8px 0; border-bottom:1px dashed var(--border)"><b>${a[1]}</b> <span style="color:var(--neon-pink)">(${a[2]})</span></li>`).join('')}
-               </ul>`
+                ${list.map(a=>`<li style="padding:8px 0; border-bottom:1px dashed var(--border)"><b>${a[1]}</b> <span style="color:var(--neon-pink)">(${a[2]})</span></li>`).join('')}
+              </ul>`
             : '<p>Sin registros.</p>';
           openModal(`Asistencias — ${f}`, html);
           playSFX();
@@ -400,19 +406,32 @@
 
     /* ===================== STARTUP ===================== */
     document.addEventListener('DOMContentLoaded', async ()=>{
-      await loadData();
-      initCalendar();
-      precomputeCounts();
+      // ¡ARREGLADO! Añadido try...catch para que la página no muera si falla el fetch
+      try {
+        await loadData();
+        initCalendar();
+        precomputeCounts();
+      } catch (error) {
+        console.error("Error fatal en el inicio:", error);
+        // Mostrar un error al usuario si la carga inicial falla
+        $('#calendarWrap').innerHTML = `<h2 style="color:var(--neon-pink)">Error al cargar</h2><p>No se pudo conectar con la base de datos. Revisa que la URL de Google Script sea correcta o inténtalo de nuevo.</p>`;
+      }
 
       // atajos
       document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); if(e.key==='/'){ e.preventDefault(); $search.focus(); } });
 
       // auto-refresh cada 30s
       setInterval(async ()=>{
-        await loadData();
-        recolorCalendarDays();
-        precomputeCounts();
-        if(viewTop.classList.contains('active')) buildTop();
+        try {
+          await loadData();
+          recolorCalendarDays();
+          precomputeCounts();
+          // Si el usuario está viendo el Top, actualizarlo
+          if(viewTop.classList.contains('active')) buildTop();
+        } catch (e) {
+          console.warn("Fallo el auto-refresh", e);
+          showToast("Error al refrescar datos.");
+        }
       }, 30000);
     });
 
