@@ -5,320 +5,380 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Calendario de Asistencia Abdara12</title>
 
+<!-- FONTS -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 
+<!-- FULLCALENDAR -->
 <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js"></script>
 
 <style>
+/* =========================
+      PALETA & BASE
+   ========================= */
 :root{
-  --font-title:'UnifrakturCook',cursive; --font-body:'Roboto',sans-serif;
-  --bg:#0a0a0a; --mid:#121212; --card:#161616; --border:#262626;
-  --txt:#ededed; --dim:#a9a9a9; --pp:#8d3aff; --pk:#ff38c7; --dk:#30005b;
-  --h:72px; --w:270px;
+  --font-title:'UnifrakturCook',cursive;
+  --font-body:'Roboto',sans-serif;
+
+  --color-bg:#0a0a0a;
+  --color-header:#121212;
+  --color-side:#121212;
+  --color-card:#161616;
+  --color-border:#262626;
+
+  --txt-main:#ededed;
+  --txt-dim:#a9a9a9;
+
+  --neon-p:#8d3aff;
+  --neon-k:#ff38c7;
+  --neon-dark:#30005b;
+
+  --h:72px;
+  --w:270px;
 }
+
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%}
-body{font-family:var(--font-body);background:var(--bg);color:var(--txt);overflow:hidden}
-#app{display:grid;grid-template-columns:var(--w) 1fr;grid-template-rows:var(--h) 1fr;grid-template-areas:"h h" "s m";height:100vh}
-header{grid-area:h;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--mid);border-bottom:1px solid var(--border)}
-h1.title{font-family:var(--font-title);font-size:clamp(1.6rem,2.2vw+1rem,2.6rem);
-  color:#e7dcff;background:linear-gradient(90deg,var(--pp),var(--pk));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-  filter:drop-shadow(0 0 6px rgba(141,58,255,.6)) drop-shadow(0 0 14px rgba(255,56,199,.35))}
-aside{grid-area:s;padding:16px;background:var(--mid);border-right:1px solid var(--border)}
-aside h2{font-family:var(--font-title);font-size:1.5rem;color:var(--pp)}
-.nav{list-style:none;display:flex;flex-direction:column;gap:10px;margin-top:10px}
-.nav a{display:block;padding:10px 14px;background:#131313;border:1px solid var(--border);border-radius:10px;color:var(--dim);text-decoration:none;cursor:pointer;transition:.25s}
-.nav a:hover,.nav a.active{background:var(--dk);color:#fff;box-shadow:0 0 12px var(--pp)}
-main{grid-area:m;position:relative;padding:16px;height:calc(100vh - var(--h));overflow:hidden;background:
-  radial-gradient(900px 700px at 10% -10%,rgba(141,58,255,.12),transparent 60%),
-  radial-gradient(900px 700px at 110% 0%,rgba(255,56,199,.12),transparent 60%)}
-.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02), 0 0 24px rgba(141,58,255,.08)}
-.view{display:none;height:100%}
-.view.active{display:block;animation:fade .25s ease}
-#calendarWrap{height:100%;display:flex;flex-direction:column}
-#calendar{flex:1;min-height:0}
-.fc{--fc-border-color:var(--border)}
-.fc .fc-toolbar-title{font-family:var(--font-title);color:#fff;text-shadow:0 0 10px var(--pp)}
-.fc .fc-button{background:var(--dk)!important;border:none!important;color:#fff!important;transition:.2s}
-.fc .fc-button:hover{background:var(--pp)!important;box-shadow:0 0 10px var(--pp)}
-.fc .fc-daygrid-day-number{color:var(--txt)}
-.fc .fc-col-header-cell-cushion{color:var(--dim)}
-.fc-theme-standard td,.fc-theme-standard th{border-color:var(--border)}
-.fc-day-today{background:#1a1220!important}
-.fc-day-with-stream{background:#240146!important;transition:.2s}
-.fc-day-with-stream:hover{background:#43007a!important;box-shadow:inset 0 0 12px var(--pp)}
-.controls{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}
-.input,.select,.btn{background:#131313;border:1px solid var(--border);color:#fff;padding:8px 12px;border-radius:10px}
-.btn{cursor:pointer;transition:.2s}
-.btn:hover{background:var(--pp);box-shadow:0 0 10px var(--pp)}
-.list{list-style:none;display:grid;grid-template-columns:1fr auto;row-gap:8px;column-gap:12px;padding:0;max-height:calc(100% - 140px);overflow:auto}
-.list li{padding:10px 0;border-bottom:1px dashed var(--border)}
-.count{color:var(--pk)}
-.pager{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
-.modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);z-index:50}
-.modal.open{display:grid;animation:fade .2s ease}
-.modal .box{width:min(720px,92vw);max-height:80vh;overflow:auto;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 0 24px rgba(141,58,255,.25)}
-.toast{position:fixed;right:16px;bottom:16px;background:#141414;border:1px solid var(--border);color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 0 14px rgba(141,58,255,.25);opacity:0;transform:translateY(10px);transition:.25s;z-index:60}
-.toast.show{opacity:1;transform:none}
-.skel{height:14px;background:#1c1c1c;border-radius:6px;overflow:hidden;position:relative}
-.skel::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);animation:sh 1.2s infinite}
-@keyframes sh{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+body{
+  font-family:var(--font-body);
+  background:var(--color-bg);
+  color:var(--txt-main);
+  overflow:hidden;
+}
+
+/* GRID */
+#app{
+  display:grid;
+  grid-template-columns:var(--w) 1fr;
+  grid-template-rows:var(--h) 1fr;
+  grid-template-areas:"h h" "s m";
+  height:100vh;
+}
+
+/* =========================
+      HEADER
+   ========================= */
+header{
+  grid-area:h;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:0 16px;
+  background:var(--color-header);
+  border-bottom:1px solid var(--color-border);
+}
+
+.title{
+  font-family:var(--font-title);
+  font-size:clamp(1.6rem,2vw+1rem,2.6rem);
+  background:linear-gradient(90deg,var(--neon-p),var(--neon-k));
+  -webkit-background-clip:text;
+  color:transparent;
+  -webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 6px rgba(141,58,255,.6))
+         drop-shadow(0 0 14px rgba(255,56,199,.35));
+}
+
+/* ICONO MENU MOVIL */
+#btnMenu{
+  display:none;
+  background:none;
+  border:none;
+  color:white;
+  font-size:1.7rem;
+  cursor:pointer;
+}
+
+/* =========================
+      SIDEBAR
+   ========================= */
+aside{
+  grid-area:s;
+  padding:16px;
+  background:var(--color-side);
+  border-right:1px solid var(--color-border);
+}
+
+.nav{list-style:none;padding:0;display:flex;flex-direction:column;gap:8px;}
+.nav a{
+  display:block;
+  padding:12px;
+  background:#131313;
+  border:1px solid var(--color-border);
+  border-radius:10px;
+  color:var(--txt-dim);
+  cursor:pointer;
+  transition:0.25s;
+  text-decoration:none;
+}
+.nav a.active, .nav a:hover{
+  background:var(--neon-dark);
+  color:white;
+  box-shadow:0 0 12px var(--neon-p);
+}
+
+/* =========================
+      MAIN
+   ========================= */
+main{
+  grid-area:m;
+  position:relative;
+  height:calc(100vh - var(--h));
+  overflow:hidden;
+  background:
+    radial-gradient(900px 700px at 10% -10%,rgba(141,58,255,.12),transparent 60%),
+    radial-gradient(900px 700px at 110% 0%,rgba(255,56,199,.12),transparent 60%);
+}
+
+.view{
+  display:none;
+  height:100%;
+}
+.view.active{
+  display:block;
+  animation:fade .25s ease;
+}
+
+.card{
+  background:var(--color-card);
+  border:1px solid var(--color-border);
+  border-radius:14px;
+  padding:14px;
+  height:100%;
+  display:flex;
+  flex-direction:column;
+}
+
 @keyframes fade{from{opacity:0}to{opacity:1}}
-@media (max-width:920px){
+
+#calendarWrap{flex:1;display:flex;flex-direction:column;min-height:0;}
+#calendar{flex:1;min-height:0;}
+
+/* FULLCALENDAR */
+.fc{--fc-border-color:var(--color-border);}
+.fc .fc-toolbar-title{font-family:var(--font-title);color:white;text-shadow:0 0 10px var(--neon-p);}
+.fc .fc-button{background:var(--neon-dark)!important;border:none!important;color:white!important;transition:.25s;}
+.fc .fc-button:hover{background:var(--neon-p)!important;box-shadow:0 0 10px var(--neon-p);}
+.fc-daygrid-day-number{color:var(--txt-main);}
+.fc-col-header-cell-cushion{color:var(--txt-dim);}
+.fc-theme-standard td,.fc-theme-standard th{border-color:var(--color-border);}
+.fc-day-today{background:#1a1220!important;}
+
+.fc-day-with-stream{
+  background:#240146!important;
+  transition:.25s;
+}
+.fc-day-with-stream:hover{
+  background:#43007a!important;
+  box-shadow:inset 0 0 12px var(--neon-p);
+}
+
+/* =========================
+      TOP ASISTENCIAS
+   ========================= */
+.list{
+  list-style:none;
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:10px;
+  padding:0;
+  margin-top:10px;
+  overflow-y:auto;
+}
+
+/* =========================
+      RESPONSIIVE
+   ========================= */
+@media(max-width:900px){
   :root{--w:0}
-  #app{grid-template-columns:1fr;grid-template-areas:"h" "m"}
-  aside{display:none}
+
+  #app{
+    grid-template-columns:1fr;
+    grid-template-areas:"h" "m";
+  }
+
+  aside{
+    position:fixed;
+    top:var(--h);
+    left:0;
+    width:200px;
+    height:calc(100vh - var(--h));
+    display:none;
+    z-index:99;
+  }
+
+  #btnMenu{
+    display:block;
+  }
 }
 </style>
 </head>
-<body>
 
+<body>
 <div id="app">
+
+  <!-- HEADER -->
   <header>
-    <h1 class="title" data-text="Calendario de Asistencia Abdara12">Calendario de Asistencia Abdara12</h1>
+    <h1 class="title">Calendario de Asistencia Abdara12</h1>
+    <button id="btnMenu">☰</button>
   </header>
 
-  <aside>
-    <h2>Menú</h2>
+  <!-- SIDEBAR -->
+  <aside id="side">
     <ul class="nav">
       <li><a id="nav-cal" class="active">Calendario</a></li>
       <li><a id="nav-top">Top Asistencias</a></li>
     </ul>
   </aside>
 
+  <!-- MAIN -->
   <main>
-    <!-- CALENDARIO -->
+
+    <!-- VISTA CALENDARIO -->
     <section id="view-cal" class="view active">
-      <div class="card" style="height:100%;display:flex;flex-direction:column;gap:10px">
-        <div class="controls" style="justify-content:space-between">
-          <div><span style="color:var(--dim)">Días con stream se iluminan.</span></div>
-          <div>
-            <button id="btnRefresh" class="btn">Actualizar</button>
-          </div>
-        </div>
-        <div id="calendarWrap" class="card" style="flex:1">
-          <div id="calendar" aria-label="Calendario"></div>
-        </div>
+      <div class="card">
+        <div id="calendarWrap"><div id="calendar"></div></div>
       </div>
     </section>
 
-    <!-- TOP ASISTENCIAS -->
+    <!-- VISTA TOP -->
     <section id="view-top" class="view">
-      <div class="card" style="height:100%;display:flex;flex-direction:column">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
-          <h2 class="title" data-text="Top Asistencias">Top Asistencias</h2>
-          <div style="display:flex;gap:8px">
-            <button class="btn" id="btnBack">&larr; Volver</button>
-            <button class="btn" id="btnRefresh2">Actualizar</button>
-          </div>
-        </div>
-
-        <div class="controls">
-          <input id="search" class="input" placeholder="Buscar usuario" />
-          <select id="sort" class="select">
-            <option value="DESC">Mayor → Menor</option>
-            <option value="ASC">Menor → Mayor</option>
-            <option value="AZ">Nombre A → Z</option>
-            <option value="ZA">Nombre Z → A</option>
-          </select>
-          <select id="pageSize" class="select">
-            <option value="10">10 por página</option>
-            <option value="15" selected>15 por página</option>
-            <option value="25">25 por página</option>
-            <option value="50">50 por página</option>
-          </select>
-        </div>
-
-        <ul id="list" class="list" aria-live="polite"></ul>
-
-        <div class="pager">
-          <span id="pageInfo" style="color:var(--dim)"></span>
-          <button class="btn" id="prev">Anterior</button>
-          <button class="btn" id="next">Siguiente</button>
-        </div>
+      <div class="card">
+        <h2 class="title" style="font-size:2rem">Top Asistencias</h2>
+        <ul id="listTop" class="list"></ul>
       </div>
     </section>
+
   </main>
-</div>
 
-<!-- MODAL -->
-<div class="modal" id="modal">
-  <div class="box">
-    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px">
-      <h3 class="title" id="modalTitle" data-text="Detalles"></h3>
-      <button class="btn" id="modalClose">Cerrar</button>
-    </div>
-    <div id="modalBody"></div>
-  </div>
 </div>
-
-<div class="toast" id="toast"></div>
 
 <script>
+/* =========================
+      CONSTANTES
+   ========================= */
 const API_URL = "https://script.google.com/macros/s/AKfycbx6WjqODhuetXMwsAtzfvXY539Quj1exnRz7s7J6FQBH2UAlag6Brs6InxPsRS3uq2F/exec?webAction=get_all_data";
-const ZONE = "America/Guatemala";
+const TIMEZONE="America/Guatemala";
 
-let DATA = { asistencia: [], streams: {} };
-let calendar;
-const state = { query:"", sort:"DESC", page:1, pageSize:15, rows:[] };
-let autoTimer = null;
+/* =========================
+      ESTADO
+   ========================= */
+let DATA={asistencia:[],streams:{}};
+let calendar=null;
+let mobileOpen=false;
 
-const $ = s=>document.querySelector(s);
-function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1200);}
+/* =========================
+      UTIL
+   ========================= */
+const $=e=>document.querySelector(e);
 
-function hasStream(dateISO){
-  const d = DATA.streams?.[dateISO];
-  return d && typeof d.startTimeUTC === "string" && d.startTimeUTC.length>0;
+/* =========================
+      NAV
+   ========================= */
+function show(v){
+  $("#view-cal").classList.remove("active");
+  $("#view-top").classList.remove("active");
+  $("#nav-cal").classList.remove("active");
+  $("#nav-top").classList.remove("active");
+
+  if(v==="cal"){
+    $("#view-cal").classList.add("active");
+    $("#nav-cal").classList.add("active");
+    renderCalendar();
+  }
+  if(v==="top"){
+    $("#view-top").classList.add("active");
+    $("#nav-top").classList.add("active");
+    renderTop();
+  }
 }
 
-async function fetchData(){
-  const url = API_URL + "&t=" + Date.now(); // cache-busting
-  let j = {asistencia:[],streams:{}};
+/* =========================
+      FETCH DATA
+   ========================= */
+async function refreshData(){
   try{
-    const r = await fetch(url,{cache:"no-store"});
-    j = await r.json();
-  }catch(e){ /* mantener j por defecto */ }
-
-  // limpiar filas rotas/vacías
-  const as = Array.isArray(j.asistencia) ? j.asistencia : [];
-  const asistencia = as.filter(row=>{
-    if(!row || row.length<3) return false;
-    const ts=row[0], user=row[1], tipo=row[2];
-    if(!ts || typeof ts!=="string") return false;
-    if(!user || String(user).trim()==="") return false;
-    if(!["normal","tarde","extra"].includes(String(tipo))) return false;
-    return true;
-  });
-
-  const streams = (j.streams && typeof j.streams==="object") ? j.streams : {};
-  DATA = { asistencia, streams };
+    const r=await fetch(API_URL+"&t="+Date.now());
+    const j=await r.json();
+    DATA.asistencia=j.asistencia.filter(a=>a[1]);
+    DATA.streams=j.streams||{};
+  }catch(e){
+    console.warn("Error cargando datos");
+  }
 }
 
-function destroyCalendar(){ if(calendar){ try{calendar.destroy();}catch(e){} calendar=null; } }
+/* =========================
+      CALENDARIO
+   ========================= */
+function destroyCalendar(){
+  if(calendar){
+    try{calendar.destroy();}catch(e){}
+    calendar=null;
+  }
+}
 
 function renderCalendar(){
   destroyCalendar();
-  const el = document.getElementById("calendar");
-  calendar = new FullCalendar.Calendar(el,{
-    height:"100%", expandRows:true, initialView:"dayGridMonth",
-    locale:"es", timeZone: ZONE,
-    headerToolbar:{ left:"prev,next today", center:"title", right:"dayGridMonth,timeGridWeek" },
+
+  calendar=new FullCalendar.Calendar($("#calendar"),{
+    initialView:"dayGridMonth",
+    timeZone:TIMEZONE,
+    locale:"es",
+    headerToolbar:{left:"prev,next today",center:"title"},
     dayCellDidMount(info){
-      const dateISO = info.date.toISOString().split("T")[0];
-      if(hasStream(dateISO)){ info.el.classList.add("fc-day-with-stream"); }
+      const d=info.date.toISOString().split("T")[0];
+      if(DATA.streams[d]) info.el.classList.add("fc-day-with-stream");
     },
     dateClick(info){
-      const dateISO = info.dateStr;
-      if(!hasStream(dateISO)) return; // día sin stream, no hace nada
-
-      const list = DATA.asistencia.filter(a=>{
-        const fa = new Date(a[0]).toLocaleDateString("en-CA",{timeZone:ZONE});
-        return fa===dateISO;
-      });
-
-      const html = list.length
-        ? `<ul style="list-style:none;padding:0;margin:0">
-             ${list.map(a=>`<li style="padding:8px 0;border-bottom:1px dashed var(--border)">
-               <b>${a[1]}</b> <span style="color:#ff38c7">(${a[2]})</span>
-             </li>`).join("")}
-           </ul>`
-        : `<p style="color:var(--dim)">Sin registros de asistencia en este stream.</p>`;
-
-      document.getElementById("modalTitle").textContent = `Asistencias — ${dateISO}`;
-      document.getElementById("modalBody").innerHTML = html;
-      document.getElementById("modal").classList.add("open");
+      const d=info.dateStr;
+      if(!DATA.streams[d]) return;
+      alert("Detalles del "+d);
     }
   });
   calendar.render();
 }
 
-function buildTopRows(){
-  const cnt = new Map();
-  for(const r of DATA.asistencia){
-    const user = r[1], tipo = r[2];
-    if(tipo==="normal"||tipo==="tarde"){
-      cnt.set(user, (cnt.get(user)||0)+1);
-    }
-  }
-  state.rows = Array.from(cnt.entries()).map(([user,count])=>({user,count}));
-}
-
+/* =========================
+      TOP
+   ========================= */
 function renderTop(){
-  let rows = state.rows.slice();
-  const q = state.query;
-  if(q) rows = rows.filter(r=> r.user.toLowerCase().includes(q));
-
-  if(state.sort==="DESC") rows.sort((a,b)=>b.count-a.count);
-  if(state.sort==="ASC") rows.sort((a,b)=>a.count-b.count);
-  if(state.sort==="AZ")  rows.sort((a,b)=>a.user.localeCompare(b.user));
-  if(state.sort==="ZA")  rows.sort((a,b)=>b.user.localeCompare(a.user));
-
-  const total = rows.length;
-  const maxPage = Math.max(1, Math.ceil(total/state.pageSize));
-  if(state.page>maxPage) state.page=maxPage;
-  const start=(state.page-1)*state.pageSize, end=start+state.pageSize;
-  const pageRows = rows.slice(start,end);
-
-  const listEl = document.getElementById("list");
-  listEl.innerHTML="";
-  if(pageRows.length===0){
-    listEl.innerHTML = `<li style="grid-column:1/-1;color:var(--dim)">Sin datos</li>`;
-  }else{
-    const frag=document.createDocumentFragment();
-    for(const r of pageRows){
-      const li1=document.createElement("li"); li1.innerHTML=`<b>${r.user}</b>`;
-      const li2=document.createElement("li"); li2.innerHTML=`<span class="count">${r.count}</span>`;
-      frag.appendChild(li1); frag.appendChild(li2);
-    }
-    listEl.appendChild(frag);
+  const list=$("#listTop");
+  const count={};
+  for(const r of DATA.asistencia){
+    let u=r[1],t=r[2];
+    if(t==="normal"||t==="tarde") count[u]=(count[u]||0)+1;
   }
-  document.getElementById("pageInfo").textContent=`Página ${state.page} / ${maxPage} — ${total} usuarios`;
-  listEl.scrollTop=0;
+  const arr=Object.entries(count).sort((a,b)=>b[1]-a[1]);
+  list.innerHTML=arr.map(x=>`
+    <li><b>${x[0]}</b></li>
+    <li>${x[1]}</li>
+  `).join("");
 }
 
-function show(view){
-  document.getElementById("view-cal").classList.remove("active");
-  document.getElementById("view-top").classList.remove("active");
-  if(view==="cal") document.getElementById("view-cal").classList.add("active");
-  if(view==="top") document.getElementById("view-top").classList.add("active");
-}
+/* =========================
+      MENU MOVIL
+   ========================= */
+$("#btnMenu").onclick=()=>{
+  mobileOpen=!mobileOpen;
+  $("#side").style.display=mobileOpen?"block":"none";
+};
 
-async function refreshAll(silent=false){
-  await fetchData();
+/* =========================
+      NAV CLICK
+   ========================= */
+$("#nav-cal").onclick = ()=>show("cal");
+$("#nav-top").onclick = ()=>show("top");
+
+/* =========================
+      INIT
+   ========================= */
+(async()=>{
+  await refreshData();
   renderCalendar();
-  buildTopRows();
-  if(document.getElementById("view-top").classList.contains("active")) renderTop();
-  if(!silent) toast("Datos actualizados");
-}
-
-document.addEventListener("DOMContentLoaded", async ()=>{
-  await refreshAll(true);
-
-  // auto-refresh cada 30s
-  autoTimer = setInterval(()=>refreshAll(true), 30000);
-
-  // nav
-  document.getElementById("nav-cal").onclick=()=>{ show("cal"); document.getElementById("nav-cal").classList.add("active"); document.getElementById("nav-top").classList.remove("active"); };
-  document.getElementById("nav-top").onclick=()=>{ show("top"); document.getElementById("nav-top").classList.add("active"); document.getElementById("nav-cal").classList.remove("active"); renderTop(); };
-
-  // botones
-  document.getElementById("btnBack").onclick=()=>show("cal");
-  document.getElementById("btnRefresh").onclick=()=>refreshAll();
-  document.getElementById("btnRefresh2").onclick=()=>refreshAll();
-
-  // top controls
-  document.getElementById("search").addEventListener("input", (e)=>{ state.query=(e.target.value||"").toLowerCase(); state.page=1; renderTop(); });
-  document.getElementById("sort").addEventListener("change", (e)=>{ state.sort=e.target.value; state.page=1; renderTop(); });
-  document.getElementById("pageSize").addEventListener("change", (e)=>{ state.pageSize=parseInt(e.target.value,10); state.page=1; renderTop(); });
-  document.getElementById("prev").onclick=()=>{ if(state.page>1){ state.page--; renderTop(); } };
-  document.getElementById("next").onclick=()=>{ state.page++; renderTop(); };
-
-  // modal
-  document.getElementById("modalClose").onclick=()=>document.getElementById("modal").classList.remove("open");
-  document.getElementById("modal").addEventListener("click",(e)=>{ if(e.target.id==="modal") document.getElementById("modal").classList.remove("open"); });
-});
+  setInterval(refreshData,30000);
+})();
 </script>
+
 </body>
 </html>
