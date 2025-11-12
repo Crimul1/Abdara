@@ -1,404 +1,329 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Calendario de Asistencia Abdara12</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Calendario de Asistencia Abdara12</title>
 
-  <!-- Fonts -->
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 
-  <!-- FullCalendar -->
-  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js"></script>
 
-  <style>
-    :root{
-      --font-title: 'UnifrakturCook', cursive;
-      --font-body: 'Roboto', sans-serif;
-
-      /* Dark Neon */
-      --bg-deep:#080808;   /* body */
-      --bg-mid:#101010;    /* header/sidebar */
-      --bg-card:#151515;   /* cards */
-      --border:#262626;
-
-      --text:#ededed;
-      --text-dim:#a9a9a9;
-
-      --neon-purple:#8d3aff;
-      --neon-pink:#ff38c7;
-      --neon-dark:#3a0061;
-
-      --ok:#00ff9d;
-      --warn:#ffe256;
-      --info:#00b7ff;
-
-      --header-h:72px;
-      --sidebar-w:270px;
-    }
-
-    /* Reset */
-    *{box-sizing:border-box;margin:0;padding:0}
-    html,body{height:100%; overscroll-behavior:none;}
-    body{font-family:var(--font-body);background:var(--bg-deep);color:var(--text);overflow:hidden}
-
-    /* Hide any webkit scrollbars globally (backup) */
-    *::-webkit-scrollbar{width:0;height:0}
-
-    /* Title styling: more solid + glow */
-    .title{
-      position:relative;
-      font-family:var(--font-title);
-      font-size:clamp(1.6rem, 2.4vw + 1rem, 2.8rem);
-      line-height:1;
-      letter-spacing:.5px;
-      color:#dcd0ff; /* solid fallback */
-      background:linear-gradient(90deg, var(--neon-purple), var(--neon-pink));
-      -webkit-background-clip:text; background-clip:text;
-      -webkit-text-fill-color:transparent;
-      filter:drop-shadow(0 0 6px rgba(141,58,255,.6)) drop-shadow(0 0 14px rgba(255,56,199,.35));
-    }
-    .title::after{ /* subtle outline for readability */
-      content:attr(data-text);
-      position:absolute; inset:0;
-      -webkit-text-fill-color:transparent;
-      text-shadow:0 0 1px rgba(255,255,255,.35), 0 0 2px rgba(141,58,255,.45);
-      pointer-events:none;
-    }
-
-    /* Layout */
-    #app{ display:grid; grid-template-columns:var(--sidebar-w) 1fr; grid-template-rows:var(--header-h) 1fr; grid-template-areas:"header header" "sidebar main"; height:100vh; }
-
-    header{ grid-area:header; display:flex; align-items:center; gap:14px; padding:0 16px; background:var(--bg-mid); border-bottom:1px solid var(--border); }
-    .hamburger{ display:none; width:38px; height:38px; border-radius:8px; border:1px solid var(--border); background:#131313; color:#fff; cursor:pointer; }
-
-    aside{ grid-area:sidebar; padding:18px; background:var(--bg-mid); border-right:1px solid var(--border); }
-    aside h2{ font-family:var(--font-title); font-size:1.6rem; text-align:center; color:var(--neon-purple); text-shadow:0 0 10px var(--neon-purple); margin-bottom:10px; }
-    .nav{ list-style:none; display:flex; flex-direction:column; gap:10px; }
-    .nav a{ display:block; padding:10px 14px; background:#131313; border:1px solid var(--border); border-radius:10px; color:var(--text-dim); text-decoration:none; transition:.25s; cursor:pointer; }
-    .nav a:hover, .nav a.active{ color:#fff; background:var(--neon-dark); box-shadow:0 0 14px var(--neon-purple); }
-
-    main{ grid-area:main; position:relative; padding:16px; height:calc(100vh - var(--header-h)); overflow:hidden; background:radial-gradient(1200px 800px at 20% -20%, rgba(141,58,255,.12), transparent 60%), radial-gradient(1200px 800px at 120% 20%, rgba(255,56,199,.12), transparent 60%); }
-
-    .card{ background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:16px; box-shadow:inset 0 0 0 1px rgba(255,255,255,0.02), 0 0 24px rgba(141,58,255,.08); }
-
-    /* Calendar fixed area */
-    #calendarWrap{ height:100%; display:flex; flex-direction:column; }
-    #calendar{ flex:1; min-height:0; }
-
-    /* FullCalendar theme */
-    .fc{ --fc-border-color:var(--border); }
-    .fc .fc-toolbar-title{ font-family:var(--font-title); color:#fff; text-shadow:0 0 12px var(--neon-purple); }
-    .fc .fc-button{ background:var(--neon-dark)!important; border:none!important; color:#fff!important; transition:.25s; }
-    .fc .fc-button:hover{ background:var(--neon-purple)!important; box-shadow:0 0 12px var(--neon-purple); }
-    .fc .fc-daygrid-day-number{ color:var(--text); }
-    .fc .fc-col-header-cell-cushion{ color:var(--text-dim); }
-    .fc-theme-standard td, .fc-theme-standard th{ border-color:var(--border); }
-    .fc-day-today{ background:#1a1220!important; }
-
-    .fc-day-with-stream{ background:#2a0047!important; transition:.25s; }
-    .fc-day-with-stream:hover{ background:#43007a!important; box-shadow:inset 0 0 12px var(--neon-purple); }
-
-    /* Buttons, inputs */
-    .btn{ background:var(--neon-dark); border:1px solid var(--neon-purple); color:#fff; padding:8px 12px; border-radius:10px; cursor:pointer; transition:.25s; }
-    .btn:hover{ background:var(--neon-purple); box-shadow:0 0 12px var(--neon-purple); }
-    .input, .select{ background:#131313; border:1px solid var(--border); color:#fff; padding:8px 12px; border-radius:10px; outline:none; }
-    .input:focus, .select:focus{ border-color:var(--neon-purple); box-shadow:0 0 10px var(--neon-purple); }
-
-    /* Views */
-    .view{ display:none; height:100%; }
-    .view.active{ display:block; animation:fade .35s ease; }
-
-    /* Top Asistencias */
-    .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:8px 0 12px; }
-    .list{ list-style:none; display:grid; grid-template-columns: 1fr auto; row-gap:8px; column-gap:12px; padding:0; max-height:calc(100% - 140px); overflow:auto; }
-    .list li{ padding:10px 0; border-bottom:1px dashed var(--border); }
-    .badge{ font-weight:700; }
-    .count{ color:var(--neon-pink); }
-    .pager{ display:flex; align-items:center; gap:10px; justify-content:flex-end; margin-top:10px; }
-
-    /* Modal */
-    .modal{ position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.55); backdrop-filter: blur(3px); z-index:50; }
-    .modal.open{ display:grid; animation:fade .2s ease; }
-    .modal .box{ width:min(720px, 92vw); max-height:80vh; overflow:auto; background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:0 0 24px rgba(141,58,255,.25); }
-
-    /* Toast */
-    .toast{ position:fixed; right:16px; bottom:16px; background:#141414; border:1px solid var(--border); color:#fff; padding:10px 14px; border-radius:10px; box-shadow:0 0 14px rgba(141,58,255,.25); opacity:0; transform:translateY(10px); transition:.25s; z-index:60; }
-    .toast.show{ opacity:1; transform:none; }
-
-    /* Animations */
-    @keyframes fade{ from{opacity:0} to{opacity:1} }
-
-    /* Mobile */
-    @media (max-width: 920px){
-      :root{ --sidebar-w: 0px; }
-      #app{ grid-template-columns: 1fr; grid-template-areas: "header" "main"; }
-      aside{ position:fixed; top:var(--header-h); left:0; bottom:0; width:280px; transform:translateX(-100%); transition:.25s; z-index:40; }
-      aside.open{ transform:none; box-shadow:12px 0 24px rgba(0,0,0,.4); }
-      .hamburger{ display:inline-grid; place-items:center; }
-    }
-  </style>
+<style>
+:root{
+  --font-title:'UnifrakturCook',cursive; --font-body:'Roboto',sans-serif;
+  --bg:#0a0a0a; --mid:#121212; --card:#161616; --border:#262626;
+  --txt:#ededed; --dim:#a9a9a9; --pp:#8d3aff; --pk:#ff38c7; --dk:#30005b;
+  --h:72px; --w:270px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{font-family:var(--font-body);background:var(--bg);color:var(--txt);overflow:hidden}
+#app{display:grid;grid-template-columns:var(--w) 1fr;grid-template-rows:var(--h) 1fr;grid-template-areas:"h h" "s m";height:100vh}
+header{grid-area:h;display:flex;align-items:center;gap:12px;padding:0 16px;background:var(--mid);border-bottom:1px solid var(--border)}
+h1.title{font-family:var(--font-title);font-size:clamp(1.6rem,2.2vw+1rem,2.6rem);
+  color:#e7dcff;background:linear-gradient(90deg,var(--pp),var(--pk));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
+  filter:drop-shadow(0 0 6px rgba(141,58,255,.6)) drop-shadow(0 0 14px rgba(255,56,199,.35))}
+aside{grid-area:s;padding:16px;background:var(--mid);border-right:1px solid var(--border)}
+aside h2{font-family:var(--font-title);font-size:1.5rem;color:var(--pp)}
+.nav{list-style:none;display:flex;flex-direction:column;gap:10px;margin-top:10px}
+.nav a{display:block;padding:10px 14px;background:#131313;border:1px solid var(--border);border-radius:10px;color:var(--dim);text-decoration:none;cursor:pointer;transition:.25s}
+.nav a:hover,.nav a.active{background:var(--dk);color:#fff;box-shadow:0 0 12px var(--pp)}
+main{grid-area:m;position:relative;padding:16px;height:calc(100vh - var(--h));overflow:hidden;background:
+  radial-gradient(900px 700px at 10% -10%,rgba(141,58,255,.12),transparent 60%),
+  radial-gradient(900px 700px at 110% 0%,rgba(255,56,199,.12),transparent 60%)}
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.02), 0 0 24px rgba(141,58,255,.08)}
+.view{display:none;height:100%}
+.view.active{display:block;animation:fade .25s ease}
+#calendarWrap{height:100%;display:flex;flex-direction:column}
+#calendar{flex:1;min-height:0}
+.fc{--fc-border-color:var(--border)}
+.fc .fc-toolbar-title{font-family:var(--font-title);color:#fff;text-shadow:0 0 10px var(--pp)}
+.fc .fc-button{background:var(--dk)!important;border:none!important;color:#fff!important;transition:.2s}
+.fc .fc-button:hover{background:var(--pp)!important;box-shadow:0 0 10px var(--pp)}
+.fc .fc-daygrid-day-number{color:var(--txt)}
+.fc .fc-col-header-cell-cushion{color:var(--dim)}
+.fc-theme-standard td,.fc-theme-standard th{border-color:var(--border)}
+.fc-day-today{background:#1a1220!important}
+.fc-day-with-stream{background:#240146!important;transition:.2s}
+.fc-day-with-stream:hover{background:#43007a!important;box-shadow:inset 0 0 12px var(--pp)}
+.controls{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 12px}
+.input,.select,.btn{background:#131313;border:1px solid var(--border);color:#fff;padding:8px 12px;border-radius:10px}
+.btn{cursor:pointer;transition:.2s}
+.btn:hover{background:var(--pp);box-shadow:0 0 10px var(--pp)}
+.list{list-style:none;display:grid;grid-template-columns:1fr auto;row-gap:8px;column-gap:12px;padding:0;max-height:calc(100% - 140px);overflow:auto}
+.list li{padding:10px 0;border-bottom:1px dashed var(--border)}
+.count{color:var(--pk)}
+.pager{display:flex;gap:8px;justify-content:flex-end;margin-top:10px}
+.modal{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.55);backdrop-filter:blur(3px);z-index:50}
+.modal.open{display:grid;animation:fade .2s ease}
+.modal .box{width:min(720px,92vw);max-height:80vh;overflow:auto;background:var(--card);border:1px solid var(--border);border-radius:16px;padding:16px;box-shadow:0 0 24px rgba(141,58,255,.25)}
+.toast{position:fixed;right:16px;bottom:16px;background:#141414;border:1px solid var(--border);color:#fff;padding:10px 14px;border-radius:10px;box-shadow:0 0 14px rgba(141,58,255,.25);opacity:0;transform:translateY(10px);transition:.25s;z-index:60}
+.toast.show{opacity:1;transform:none}
+.skel{height:14px;background:#1c1c1c;border-radius:6px;overflow:hidden;position:relative}
+.skel::after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent);animation:sh 1.2s infinite}
+@keyframes sh{from{transform:translateX(-100%)}to{transform:translateX(100%)}}
+@keyframes fade{from{opacity:0}to{opacity:1}}
+@media (max-width:920px){
+  :root{--w:0}
+  #app{grid-template-columns:1fr;grid-template-areas:"h" "m"}
+  aside{display:none}
+}
+</style>
 </head>
 <body>
 
-  <!-- SFX (suave) -->
-  <audio id="sfx" src="https://cdn.freesound.org/previews/656/656770_1648170-lq.mp3"></audio>
+<div id="app">
+  <header>
+    <h1 class="title" data-text="Calendario de Asistencia Abdara12">Calendario de Asistencia Abdara12</h1>
+  </header>
 
-  <div id="app">
-    <header>
-      <button class="hamburger" id="btnMenu">☰</button>
-      <h1 class="title" id="pageTitle" data-text="Calendario de Asistencia Abdara12">Calendario de Asistencia Abdara12</h1>
-    </header>
+  <aside>
+    <h2>Menú</h2>
+    <ul class="nav">
+      <li><a id="nav-cal" class="active">Calendario</a></li>
+      <li><a id="nav-top">Top Asistencias</a></li>
+    </ul>
+  </aside>
 
-    <aside id="sidebar">
-      <h2>Menú</h2>
-      <ul class="nav">
-        <li><a id="nav-cal" class="active">Calendario</a></li>
-        <li><a id="nav-top">Top Asistencias</a></li>
-      </ul>
-    </aside>
-
-    <main>
-      <!-- CALENDAR VIEW (fijo, sin scroll fantasma) -->
-      <section id="view-cal" class="view active">
-        <div id="calendarWrap" class="card" style="height:100%">
+  <main>
+    <!-- CALENDARIO -->
+    <section id="view-cal" class="view active">
+      <div class="card" style="height:100%;display:flex;flex-direction:column;gap:10px">
+        <div class="controls" style="justify-content:space-between">
+          <div><span style="color:var(--dim)">Días con stream se iluminan.</span></div>
+          <div>
+            <button id="btnRefresh" class="btn">Actualizar</button>
+          </div>
+        </div>
+        <div id="calendarWrap" class="card" style="flex:1">
           <div id="calendar" aria-label="Calendario"></div>
         </div>
-      </section>
+      </div>
+    </section>
 
-      <!-- TOP ASISTENCIAS (completo + filtros + orden + paginación + búsqueda) -->
-      <section id="view-top" class="view">
-        <div class="card" style="height:100%">
-          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px;">
-            <h2 class="title" data-text="Top Asistencias">Top Asistencias</h2>
-            <div style="display:flex; gap:8px;">
-              <button class="btn" id="btn-back">&larr; Volver</button>
-            </div>
-          </div>
-
-          <!-- Controles -->
-          <div class="controls">
-            <input id="search" class="input" placeholder="Buscar usuario (/ para enfocar)" />
-            <select id="type" class="select">
-              <option value="all">Todos los tipos</option>
-              <option value="normal">Solo Normal</option>
-              <option value="tarde">Solo Tarde</option>
-              <option value="extra">Solo Extra</option>
-            </select>
-            <select id="sort" class="select">
-              <option value="DESC">Mayor → Menor</option>
-              <option value="ASC">Menor → Mayor</option>
-              <option value="AZ">Nombre A → Z</option>
-              <option value="ZA">Nombre Z → A</option>
-            </select>
-            <select id="pageSize" class="select">
-              <option value="10">10 por página</option>
-              <option value="15" selected>15 por página</option>
-              <option value="25">25 por página</option>
-              <option value="50">50 por página</option>
-            </select>
-            <button id="btnReset" class="btn">Reiniciar</button>
-          </div>
-
-          <!-- Listado -->
-          <ul id="list" class="list" aria-live="polite"></ul>
-
-          <!-- Paginación -->
-          <div class="pager">
-            <span id="pageInfo" style="color:var(--text-dim)"></span>
-            <button class="btn" id="prev">Anterior</button>
-            <button class="btn" id="next">Siguiente</button>
+    <!-- TOP ASISTENCIAS -->
+    <section id="view-top" class="view">
+      <div class="card" style="height:100%;display:flex;flex-direction:column">
+        <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;margin-bottom:8px">
+          <h2 class="title" data-text="Top Asistencias">Top Asistencias</h2>
+          <div style="display:flex;gap:8px">
+            <button class="btn" id="btnBack">&larr; Volver</button>
+            <button class="btn" id="btnRefresh2">Actualizar</button>
           </div>
         </div>
-      </section>
-    </main>
-  </div>
 
-  <!-- Modal Detalles Día -->
-  <div class="modal" id="modal">
-    <div class="box">
-      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px;">
-        <h3 class="title" id="modalTitle" data-text="Detalles"></h3>
-        <button class="btn" id="modalClose">Cerrar</button>
+        <div class="controls">
+          <input id="search" class="input" placeholder="Buscar usuario" />
+          <select id="sort" class="select">
+            <option value="DESC">Mayor → Menor</option>
+            <option value="ASC">Menor → Mayor</option>
+            <option value="AZ">Nombre A → Z</option>
+            <option value="ZA">Nombre Z → A</option>
+          </select>
+          <select id="pageSize" class="select">
+            <option value="10">10 por página</option>
+            <option value="15" selected>15 por página</option>
+            <option value="25">25 por página</option>
+            <option value="50">50 por página</option>
+          </select>
+        </div>
+
+        <ul id="list" class="list" aria-live="polite"></ul>
+
+        <div class="pager">
+          <span id="pageInfo" style="color:var(--dim)"></span>
+          <button class="btn" id="prev">Anterior</button>
+          <button class="btn" id="next">Siguiente</button>
+        </div>
       </div>
-      <div id="modalBody"></div>
+    </section>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal" id="modal">
+  <div class="box">
+    <div style="display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:8px">
+      <h3 class="title" id="modalTitle" data-text="Detalles"></h3>
+      <button class="btn" id="modalClose">Cerrar</button>
     </div>
+    <div id="modalBody"></div>
   </div>
+</div>
 
-  <!-- Toast -->
-  <div class="toast" id="toast"></div>
+<div class="toast" id="toast"></div>
 
-  <script>
-    /* ===================== CONFIG ===================== */
-    const API_URL = "https://script.google.com/macros/s/AKfycbx6WjqODhuetXMwsAtzfvXY539Quj1exnRz7s7J6FQBH2UAlag6Brs6InxPsRS3uq2F/exec?webAction=get_all_data";
-    const ZONE = "America/Guatemala";
+<script>
+const API_URL = "https://script.google.com/macros/s/AKfycbx6WjqODhuetXMwsAtzfvXY539Quj1exnRz7s7J6FQBH2UAlag6Brs6InxPsRS3uq2F/exec?webAction=get_all_data";
+const ZONE = "America/Guatemala";
 
-    let STREAMS = {};
-    let ASIST = [];
+let DATA = { asistencia: [], streams: {} };
+let calendar;
+const state = { query:"", sort:"DESC", page:1, pageSize:15, rows:[] };
 
-    // Pre-counters memo por tipo
-    const memoCounts = new Map(); // key: type -> Map(user=>count)
+const $ = s=>document.querySelector(s);
+const $$ = s=>document.querySelectorAll(s);
 
-    // Estado Top Asistencias
-    const state = {
-      query: "",
-      type: "all",
-      sort: "DESC",
-      page: 1,
-      pageSize: 15,
-      rows: [] // [{user, count}]
-    };
+function toast(msg){const t=$("#toast");t.textContent=msg;t.classList.add("show");setTimeout(()=>t.classList.remove("show"),1200);}
 
-    /* ===================== HELPERS / NUEVAS FUNCIONES ===================== */
-    const $ = sel => document.querySelector(sel);
-    const $$ = sel => document.querySelectorAll(sel);
+function hasStream(dateISO){
+  const d = DATA.streams?.[dateISO];
+  // marcar sólo si existe startTimeUTC (no marcar si el sheet quedó vacío)
+  return d && typeof d.startTimeUTC === "string" && d.startTimeUTC.length>0;
+}
 
-    function debounce(fn, ms){
-      let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), ms); };
-    }
+async function fetchData(){
+  // cache-busting & robustez ante hojas vacías
+  const url = API_URL + "&t=" + Date.now();
+  const r = await fetch(url, {cache:"no-store"});
+  const j = await r.json().catch(()=>({asistencia:[],streams:{}}));
 
-    function playSFX(){ const s=$('#sfx'); try{ s.volume=0.35; s.currentTime=0; s.play(); }catch(e){} }
+  // Sanitizar: quitar filas malas/headers/usuarios vacíos
+  const asistencia = Array.isArray(j.asistencia)? j.asistencia.filter(row=>{
+    if(!row || row.length<3) return false;
+    const ts=row[0], user=row[1], tipo=row[2];
+    if(!user || typeof user!=="string" || user.trim()==="") return false;
+    if(!ts || typeof ts!=="string") return false;
+    if(!["normal","tarde","extra"].includes(String(tipo))) return false;
+    return true;
+  }):[];
 
-    function showToast(msg){ const el=$('#toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), 1400); }
+  const streams = (j.streams && typeof j.streams==="object") ? j.streams : {};
 
-    function openModal(title, html){ $('#modalTitle').textContent=title; $('#modalTitle').setAttribute('data-text',title); $('#modalBody').innerHTML=html; $('#modal').classList.add('open'); }
-    function closeModal(){ $('#modal').classList.remove('open'); }
+  DATA = { asistencia, streams };
+}
 
-    function toggleSidebar(force){ const sb=$('#sidebar'); if(force===true){sb.classList.add('open');} else if(force===false){sb.classList.remove('open');} else {sb.classList.toggle('open');} }
+function destroyCalendar(){ if(calendar){ try{ calendar.destroy(); }catch(e){} calendar=null; } }
 
-    function saveUIState(){ localStorage.setItem('ab_top_state', JSON.stringify({type:state.type, sort:state.sort, pageSize:state.pageSize})); }
-    function loadUIState(){ try{ const x=JSON.parse(localStorage.getItem('ab_top_state')); if(x){ state.type=x.type||state.type; state.sort=x.sort||state.sort; state.pageSize=x.pageSize||state.pageSize; } }catch(e){} }
+function renderCalendar(){
+  destroyCalendar();
+  const el = $("#calendar");
+  calendar = new FullCalendar.Calendar(el, {
+    height:"100%", expandRows:true, initialView:"dayGridMonth",
+    locale:"es", timeZone: ZONE,
+    headerToolbar:{ left:"prev,next today", center:"title", right:"dayGridMonth,timeGridWeek" },
+    dayCellDidMount(info){
+      const dateISO = info.date.toISOString().split("T")[0];
+      if(hasStream(dateISO)){ info.el.classList.add("fc-day-with-stream"); }
+    },
+    dateClick(info){
+      const dateISO = info.dateStr;
+      if(!hasStream(dateISO)) return; // no hacer nada si no hubo stream
 
-    /* ===================== NAV ===================== */
-    const viewCal = $('#view-cal');
-    const viewTop = $('#view-top');
-
-    $('#btnMenu').addEventListener('click', ()=>toggleSidebar());
-    $('#nav-cal').addEventListener('click', ()=>{ show('cal'); $('#nav-cal').classList.add('active'); $('#nav-top').classList.remove('active'); toggleSidebar(false); });
-    $('#nav-top').addEventListener('click', ()=>{ buildTop(); show('top'); playSFX(); $('#nav-top').classList.add('active'); $('#nav-cal').classList.remove('active'); toggleSidebar(false); });
-    $('#btn-back').addEventListener('click', ()=>{ show('cal'); });
-
-    function show(view){ viewCal.classList.remove('active'); viewTop.classList.remove('active'); if(view==='cal') viewCal.classList.add('active'); if(view==='top') viewTop.classList.add('active'); }
-
-    /* ===================== LOAD DATA ===================== */
-    document.addEventListener('DOMContentLoaded', async ()=>{
-      loadUIState();
-      const res = await fetch(API_URL);
-      const json = await res.json();
-      STREAMS = json.streams || {};
-      ASIST = json.asistencia || [];
-      initCalendar();
-      // Precompute counters for fast switches
-      precomputeCounts();
-      // shortcuts
-      document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); if(e.key==='/'){ e.preventDefault(); $('#search').focus(); } });
-    });
-
-    /* ===================== CALENDAR ===================== */
-    function initCalendar(){
-      const el = $('#calendar');
-      const cal = new FullCalendar.Calendar(el,{
-        height: '100%',
-        expandRows: true,
-        initialView:'dayGridMonth',
-        locale:'es',
-        timeZone: ZONE,
-        headerToolbar:{ left:'prev,next today', center:'title', right:'dayGridMonth,timeGridWeek' },
-        dayCellDidMount(arg){
-          const iso = arg.date.toISOString().split('T')[0];
-          if(STREAMS[iso]) arg.el.classList.add('fc-day-with-stream');
-        },
-        dateClick(info){
-          const f = info.dateStr;
-          if(!STREAMS[f]) return;
-          const list = ASIST.filter(a=> new Date(a[0]).toLocaleDateString('en-CA',{timeZone:ZONE}) === f);
-          const html = list.length
-            ? `<ul style="list-style:none; padding:0; margin:0">${list.map(a=>`<li style='padding:8px 0; border-bottom:1px dashed var(--border)'><b>${a[1]}</b> <span style='color:var(--neon-pink)'>(${a[2]})</span></li>`).join('')}</ul>`
-            : '<p>Sin registros.</p>';
-          openModal(`Asistencias — ${f}`, html); playSFX();
-        }
+      const list = DATA.asistencia.filter(a=>{
+        const fa = new Date(a[0]).toLocaleDateString("en-CA",{timeZone:ZONE});
+        return fa===dateISO;
       });
-      cal.render();
+
+      const html = list.length
+        ? `<ul style="list-style:none;padding:0;margin:0">
+            ${list.map(a=>`<li style="padding:8px 0;border-bottom:1px dashed var(--border)">
+               <b>${a[1]}</b> <span style="color:#ff38c7">(${a[2]})</span>
+             </li>`).join("")}
+           </ul>`
+        : `<div class="skel" style="width:100%"></div><p style="margin-top:8px;color:var(--dim)">Sin registros para este día.</p>`;
+
+      $("#modalTitle").textContent = `Asistencias — ${dateISO}`;
+      $("#modal").classList.add("open");
+      $("#modalBody").innerHTML = html;
     }
+  });
+  calendar.render();
+}
 
-    // Modal close events
-    $('#modalClose').addEventListener('click', closeModal);
-    $('#modal').addEventListener('click', (e)=>{ if(e.target.id==='modal') closeModal(); });
-
-    /* ===================== TOP ASISTENCIAS ===================== */
-    const $search = $('#search');
-    const $type = $('#type');
-    const $sort = $('#sort');
-    const $pageSize = $('#pageSize');
-    const $list = $('#list');
-    const $pageInfo = $('#pageInfo');
-    const $prev = $('#prev');
-    const $next = $('#next');
-    const $btnReset = $('#btnReset');
-
-    // Debounced search
-    $search.addEventListener('input', debounce(()=>{ state.query = ($search.value||'').trim().toLowerCase(); state.page=1; renderTop(); }, 180));
-    $type.addEventListener('change', ()=>{ state.type = $type.value; state.page=1; buildTop(); saveUIState(); showToast('Filtro aplicado'); });
-    $sort.addEventListener('change', ()=>{ state.sort = $sort.value; state.page=1; renderTop(); saveUIState(); });
-    $pageSize.addEventListener('change', ()=>{ state.pageSize = parseInt($pageSize.value,10); state.page=1; renderTop(); saveUIState(); });
-    $prev.addEventListener('click', ()=>{ if(state.page>1){ state.page--; renderTop(); } });
-    $next.addEventListener('click', ()=>{ const max = Math.ceil(state.rows.length/state.pageSize)||1; if(state.page<max){ state.page++; renderTop(); } });
-    $btnReset.addEventListener('click', ()=>{ $search.value=''; state.query=''; $type.value='all'; state.type='all'; $sort.value='DESC'; state.sort='DESC'; state.page=1; state.pageSize=parseInt($pageSize.value,10); buildTop(); showToast('Filtros reiniciados'); });
-
-    function precomputeCounts(){
-      const types = ['all','normal','tarde','extra'];
-      for(const t of types){ memoCounts.set(t, new Map()); }
-      for(const r of ASIST){
-        const user=r[1], tipo=r[2];
-        // all
-        memoCounts.get('all').set(user,(memoCounts.get('all').get(user)||0)+1);
-        // specific
-        if(memoCounts.has(tipo)) memoCounts.get(tipo).set(user,(memoCounts.get(tipo).get(user)||0)+1);
-      }
+function buildTopRows(){
+  // contar solo normal+tarde
+  const cnt = new Map();
+  for(const r of DATA.asistencia){
+    const user = r[1], tipo = r[2];
+    if(tipo==="normal"||tipo==="tarde"){
+      cnt.set(user, (cnt.get(user)||0)+1);
     }
+  }
+  state.rows = Array.from(cnt.entries()).map(([user,count])=>({user,count}));
+}
 
-    function buildTop(){
-      const m = memoCounts.get(state.type)||new Map();
-      state.rows = Array.from(m.entries()).map(([user,count])=>({user, count}));
-      renderTop();
+function renderTop(){
+  let rows = state.rows.slice();
+
+  // filtro por nombre
+  if(state.query){ rows = rows.filter(r=> r.user.toLowerCase().includes(state.query)); }
+
+  // orden
+  if(state.sort==="DESC") rows.sort((a,b)=>b.count-a.count);
+  if(state.sort==="ASC") rows.sort((a,b)=>a.count-b.count);
+  if(state.sort==="AZ")  rows.sort((a,b)=>a.user.localeCompare(b.user));
+  if(state.sort==="ZA")  rows.sort((a,b)=>b.user.localeCompare(a.user));
+
+  const total = rows.length;
+  const maxPage = Math.max(1, Math.ceil(total/state.pageSize));
+  if(state.page>maxPage) state.page=maxPage;
+  const start=(state.page-1)*state.pageSize, end=start+state.pageSize;
+  const pageRows = rows.slice(start,end);
+
+  const listEl = $("#list");
+  listEl.innerHTML="";
+  if(pageRows.length===0){
+    listEl.innerHTML = `<li style="grid-column:1/-1;color:var(--dim)">Sin datos</li>`;
+  }else{
+    const frag=document.createDocumentFragment();
+    for(const r of pageRows){
+      const li1=document.createElement("li"); li1.innerHTML=`<b>${r.user}</b>`;
+      const li2=document.createElement("li"); li2.innerHTML=`<span class="count">${r.count}</span>`;
+      frag.appendChild(li1); frag.appendChild(li2);
     }
+    listEl.appendChild(frag);
+  }
+  $("#pageInfo").textContent=`Página ${state.page} / ${maxPage} — ${total} usuarios`;
+  listEl.scrollTop=0;
+}
 
-    function renderTop(){
-      let rows = state.rows.slice();
+function show(view){
+  $("#view-cal").classList.remove("active");
+  $("#view-top").classList.remove("active");
+  if(view==="cal") $("#view-cal").classList.add("active");
+  if(view==="top") $("#view-top").classList.add("active");
+}
 
-      // búsqueda
-      if(state.query){ rows = rows.filter(r => r.user.toLowerCase().includes(state.query)); }
+async function refreshAll(silent=false){
+  await fetchData();            // lee HOJA ACTUAL
+  renderCalendar();             // repinta calendario con lo nuevo
+  buildTopRows();               // recalcula top
+  if($("#view-top").classList.contains("active")) renderTop();
+  if(!silent) toast("Datos actualizados");
+}
 
-      // orden
-      if(state.sort === 'DESC') rows.sort((a,b)=> b.count - a.count);
-      if(state.sort === 'ASC') rows.sort((a,b)=> a.count - b.count);
-      if(state.sort === 'AZ') rows.sort((a,b)=> a.user.localeCompare(b.user));
-      if(state.sort === 'ZA') rows.sort((a,b)=> b.user.localeCompare(a.user));
+// UI
+document.addEventListener("DOMContentLoaded", async ()=>{
+  // cargar
+  await refreshAll(true);
 
-      // paginación
-      const total = rows.length;
-      const maxPage = Math.max(1, Math.ceil(total / state.pageSize));
-      if(state.page > maxPage) state.page = maxPage;
-      const start = (state.page-1)*state.pageSize;
-      const end = start + state.pageSize;
-      const pageRows = rows.slice(start,end);
+  // auto-update cada 30s
+  setInterval(()=>refreshAll(true), 30000);
 
-      // pintar
-      $list.innerHTML = '';
-      const frag = document.createDocumentFragment();
-      for(const r of pageRows){
-        const liName=document.createElement('li'); liName.innerHTML=`<span class="badge">${r.user}</span>`;
-        const liCount=document.createElement('li'); liCount.innerHTML=`<span class="count">${r.count}</span>`;
-        frag.appendChild(liName); frag.appendChild(liCount);
-      }
-      $list.appendChild(frag);
+  // nav
+  $("#nav-cal").onclick=()=>{ show("cal"); $("#nav-cal").classList.add("active"); $("#nav-top").classList.remove("active"); };
+  $("#nav-top").onclick=()=>{ show("top"); $("#nav-top").classList.add("active"); $("#nav-cal").classList.remove("active"); renderTop(); };
 
-      $pageInfo.textContent = `Página ${state.page} / ${maxPage} — ${total} usuarios`;
-      // scroll suave al inicio del listado
-      $list.scrollTo({top:0, behavior:'smooth'});
-    }
-  </script>
+  // botones
+  $("#btnBack").onclick=()=>show("cal");
+  $("#btnRefresh").onclick=()=>refreshAll();
+  $("#btnRefresh2").onclick=()=>refreshAll();
+
+  // top controls
+  $("#search").addEventListener("input", (e)=>{ state.query=(e.target.value||"").toLowerCase(); state.page=1; renderTop(); });
+  $("#sort").addEventListener("change", (e)=>{ state.sort=e.target.value; state.page=1; renderTop(); });
+  $("#pageSize").addEventListener("change", (e)=>{ state.pageSize=parseInt(e.target.value,10); state.page=1; renderTop(); });
+  $("#prev").onclick=()=>{ if(state.page>1){ state.page--; renderTop(); } };
+  $("#next").onclick=()=>{ state.page++; renderTop(); };
+
+  // modal
+  $("#modalClose").onclick=()=>$("#modal").classList.remove("open");
+  $("#modal").addEventListener("click",(e)=>{ if(e.target.id==="modal") $("#modal").classList.remove("open"); });
+});
+</script>
 </body>
 </html>
