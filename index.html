@@ -56,11 +56,11 @@
       letter-spacing:.5px;
       color:#dcd0ff; /* solid fallback */
       background:linear-gradient(90deg, var(--neon-purple), var(--neon-pink));
-      -webkit-background-clip: text; background-clip: text;
-      -webkit-text-fill-color: transparent;
+      -webkit-background-clip:text; background-clip:text;
+      -webkit-text-fill-color:transparent;
       filter:drop-shadow(0 0 6px rgba(141,58,255,.6)) drop-shadow(0 0 14px rgba(255,56,199,.35));
     }
-    .title::after{
+    .title::after{ /* subtle outline for readability */
       content:attr(data-text);
       position:absolute; inset:0;
       -webkit-text-fill-color:transparent;
@@ -69,67 +69,27 @@
     }
 
     /* Layout */
-    #app{
-      display:grid;
-      grid-template-columns:var(--sidebar-w) 1fr;
-      grid-template-rows:var(--header-h) 1fr;
-      grid-template-areas:
-        "header header"
-        "sidebar main";
-      height:100vh;
-    }
+    #app{ display:grid; grid-template-columns:var(--sidebar-w) 1fr; grid-template-rows:var(--header-h) 1fr; grid-template-areas:"header header" "sidebar main"; height:100vh; }
 
-    header{
-      grid-area:header;
-      display:flex; align-items:center; gap:14px;
-      padding:0 16px;
-      background:var(--bg-mid);
-      border-bottom:1px solid var(--border);
-    }
-    .hamburger{
-      display:none; width:38px; height:38px; border-radius:8px;
-      border:1px solid var(--border);
-      background:#131313; color:#fff; cursor:pointer;
-    }
+    header{ grid-area:header; display:flex; align-items:center; gap:14px; padding:0 16px; background:var(--bg-mid); border-bottom:1px solid var(--border); }
+    .hamburger{ display:none; width:38px; height:38px; border-radius:8px; border:1px solid var(--border); background:#131313; color:#fff; cursor:pointer; }
 
-    aside{
-      grid-area:sidebar;
-      padding:18px;
-      background:var(--bg-mid);
-      border-right:1px solid var(--border);
-    }
-    aside h2{
-      font-family:var(--font-title); font-size:1.6rem; text-align:center;
-      color:var(--neon-purple); text-shadow:0 0 10px var(--neon-purple); margin-bottom:10px;
-    }
+    aside{ grid-area:sidebar; padding:18px; background:var(--bg-mid); border-right:1px solid var(--border); }
+    aside h2{ font-family:var(--font-title); font-size:1.6rem; text-align:center; color:var(--neon-purple); text-shadow:0 0 10px var(--neon-purple); margin-bottom:10px; }
     .nav{ list-style:none; display:flex; flex-direction:column; gap:10px; }
-    .nav a{
-      display:block; padding:10px 14px; background:#131313;
-      border:1px solid var(--border); border-radius:10px; color:var(--text-dim);
-      text-decoration:none; transition:.25s; cursor:pointer;
-    }
+    .nav a{ display:block; padding:10px 14px; background:#131313; border:1px solid var(--border); border-radius:10px; color:var(--text-dim); text-decoration:none; transition:.25s; cursor:pointer; }
     .nav a:hover, .nav a.active{ color:#fff; background:var(--neon-dark); box-shadow:0 0 14px var(--neon-purple); }
 
-    main{
-      grid-area:main; position:relative;
-      padding:16px; height:calc(100vh - var(--header-h)); overflow:hidden;
-      background:
-        radial-gradient(1200px 800px at 20% -20%, rgba(141,58,255,.12), transparent 60%),
-        radial-gradient(1200px 800px at 120% 20%, rgba(255,56,199,.12), transparent 60%);
-    }
+    main{ grid-area:main; position:relative; padding:16px; height:calc(100vh - var(--header-h)); overflow:hidden; background:radial-gradient(1200px 800px at 20% -20%, rgba(141,58,255,.12), transparent 60%), radial-gradient(1200px 800px at 120% 20%, rgba(255,56,199,.12), transparent 60%); }
 
-    .card{
-      background:var(--bg-card); border:1px solid var(--border);
-      border-radius:14px; padding:16px;
-      box-shadow:inset 0 0 0 1px rgba(255,255,255,0.02), 0 0 24px rgba(141,58,255,.08);
-    }
+    .card{ background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:16px; box-shadow:inset 0 0 0 1px rgba(255,255,255,0.02), 0 0 24px rgba(141,58,255,.08); }
 
     /* Calendar fixed area */
     #calendarWrap{ height:100%; display:flex; flex-direction:column; }
     #calendar{ flex:1; min-height:0; }
 
     /* FullCalendar theme */
-    .fc{ --fc-border-color: var(--border); }
+    .fc{ --fc-border-color:var(--border); }
     .fc .fc-toolbar-title{ font-family:var(--font-title); color:#fff; text-shadow:0 0 12px var(--neon-purple); }
     .fc .fc-button{ background:var(--neon-dark)!important; border:none!important; color:#fff!important; transition:.25s; }
     .fc .fc-button:hover{ background:var(--neon-purple)!important; box-shadow:0 0 12px var(--neon-purple); }
@@ -260,7 +220,7 @@
   <div class="modal" id="modal">
     <div class="box">
       <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px;">
-        <h3 class="title" id="modalTitle" data-text="Detalles">Detalles</h3>
+        <h3 class="title" id="modalTitle" data-text="Detalles"></h3>
         <button class="btn" id="modalClose">Cerrar</button>
       </div>
       <div id="modalBody"></div>
@@ -278,29 +238,38 @@
     let STREAMS = {};
     let ASIST = [];
 
-    const memoCounts = new Map(); // type -> Map(user=>count)
+    // Pre-counters memo por tipo
+    const memoCounts = new Map(); // key: type -> Map(user=>count)
 
+    // Estado Top Asistencias
     const state = {
       query: "",
       type: "all",
       sort: "DESC",
       page: 1,
       pageSize: 15,
-      rows: []
+      rows: [] // [{user, count}]
     };
 
-    /* ===================== HELPERS ===================== */
+    /* ===================== HELPERS / NUEVAS FUNCIONES ===================== */
     const $ = sel => document.querySelector(sel);
     const $$ = sel => document.querySelectorAll(sel);
 
     function debounce(fn, ms){
       let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), ms); };
     }
+
     function playSFX(){ const s=$('#sfx'); try{ s.volume=0.35; s.currentTime=0; s.play(); }catch(e){} }
+
     function showToast(msg){ const el=$('#toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), 1400); }
-    function openModal(title, html){ $('#modalTitle').textContent=title; $('#modalBody').innerHTML=html; $('#modal').classList.add('open'); }
+
+    function openModal(title, html){ $('#modalTitle').textContent=title; $('#modalTitle').setAttribute('data-text',title); $('#modalBody').innerHTML=html; $('#modal').classList.add('open'); }
     function closeModal(){ $('#modal').classList.remove('open'); }
+
     function toggleSidebar(force){ const sb=$('#sidebar'); if(force===true){sb.classList.add('open');} else if(force===false){sb.classList.remove('open');} else {sb.classList.toggle('open');} }
+
+    function saveUIState(){ localStorage.setItem('ab_top_state', JSON.stringify({type:state.type, sort:state.sort, pageSize:state.pageSize})); }
+    function loadUIState(){ try{ const x=JSON.parse(localStorage.getItem('ab_top_state')); if(x){ state.type=x.type||state.type; state.sort=x.sort||state.sort; state.pageSize=x.pageSize||state.pageSize; } }catch(e){} }
 
     /* ===================== NAV ===================== */
     const viewCal = $('#view-cal');
@@ -311,56 +280,26 @@
     $('#nav-top').addEventListener('click', ()=>{ buildTop(); show('top'); playSFX(); $('#nav-top').classList.add('active'); $('#nav-cal').classList.remove('active'); toggleSidebar(false); });
     $('#btn-back').addEventListener('click', ()=>{ show('cal'); });
 
-    function show(view){
-      viewCal.classList.remove('active'); viewTop.classList.remove('active');
-      if(view==='cal') viewCal.classList.add('active');
-      if(view==='top') viewTop.classList.add('active');
-    }
+    function show(view){ viewCal.classList.remove('active'); viewTop.classList.remove('active'); if(view==='cal') viewCal.classList.add('active'); if(view==='top') viewTop.classList.add('active'); }
 
     /* ===================== LOAD DATA ===================== */
-    async function loadData(){
-      const res = await fetch(API_URL + "&_=" + Date.now());
-      const json = await res.json();
-
-      STREAMS = json.streams || {};
-
-      // Anti-fantasma: filtra filas inválidas
-      ASIST = (json.asistencia || []).filter(row=>{
-        const fecha = row[0]; const user = row[1]; const tipo = row[2];
-        if(!user || !String(user).trim()) return false;
-        if(!['normal','tarde','extra'].includes(tipo)) return false;
-        if(!fecha || isNaN(Date.parse(fecha))) return false;
-        return true;
-      });
-    }
-
     document.addEventListener('DOMContentLoaded', async ()=>{
-      await loadData();
+      loadUIState();
+      const res = await fetch(API_URL);
+      const json = await res.json();
+      STREAMS = json.streams || {};
+      ASIST = json.asistencia || [];
       initCalendar();
+      // Precompute counters for fast switches
       precomputeCounts();
-
       // shortcuts
       document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); if(e.key==='/'){ e.preventDefault(); $('#search').focus(); } });
-
-      // auto-refresh cada 30s
-      setInterval(async ()=>{
-        await loadData();
-        // Recolor días del calendario rápidamente
-        recolorCalendarDays();
-        // Recalcula top si estás en la vista
-        if(viewTop.classList.contains('active')){
-          precomputeCounts();
-          buildTop();
-        }
-      }, 30000);
     });
 
     /* ===================== CALENDAR ===================== */
-    let calendar;
     function initCalendar(){
       const el = $('#calendar');
-      if(calendar){ try{ calendar.destroy(); }catch(e){} }
-      calendar = new FullCalendar.Calendar(el,{
+      const cal = new FullCalendar.Calendar(el,{
         height: '100%',
         expandRows: true,
         initialView:'dayGridMonth',
@@ -376,25 +315,12 @@
           if(!STREAMS[f]) return;
           const list = ASIST.filter(a=> new Date(a[0]).toLocaleDateString('en-CA',{timeZone:ZONE}) === f);
           const html = list.length
-            ? `<ul style="list-style:none; padding:0; margin:0">
-                 ${list.map(a=>`<li style="padding:8px 0; border-bottom:1px dashed var(--border)"><b>${a[1]}</b> <span style="color:var(--neon-pink)">(${a[2]})</span></li>`).join('')}
-               </ul>`
+            ? <ul style="list-style:none; padding:0; margin:0">${list.map(a=><li style='padding:8px 0; border-bottom:1px dashed var(--border)'><b>${a[1]}</b> <span style='color:var(--neon-pink)'>(${a[2]})</span></li>).join('')}</ul>
             : '<p>Sin registros.</p>';
-          openModal(`Asistencias — ${f}`, html);
-          playSFX();
+          openModal(Asistencias — ${f}, html); playSFX();
         }
       });
-      calendar.render();
-    }
-
-    function recolorCalendarDays(){
-      // quita marcas previas
-      $$('.fc-daygrid-day').forEach(d=>d.classList.remove('fc-day-with-stream'));
-      // aplica marcas según STREAMS actual
-      $$('.fc-daygrid-day').forEach(cell=>{
-        const dataDate = cell.getAttribute('data-date'); // FullCalendar setea data-date
-        if(dataDate && STREAMS[dataDate]) cell.classList.add('fc-day-with-stream');
-      });
+      cal.render();
     }
 
     // Modal close events
@@ -412,28 +338,23 @@
     const $next = $('#next');
     const $btnReset = $('#btnReset');
 
-    $search.addEventListener('input', debounce(()=>{
-      state.query = ($search.value||'').trim().toLowerCase();
-      state.page=1; renderTop();
-    }, 140));
-    $type.addEventListener('change', ()=>{ state.type = $type.value; state.page=1; buildTop(); showToast('Filtro aplicado'); });
-    $sort.addEventListener('change', ()=>{ state.sort = $sort.value; state.page=1; renderTop(); });
-    $pageSize.addEventListener('change', ()=>{ state.pageSize = parseInt($pageSize.value,10); state.page=1; renderTop(); });
+    // Debounced search
+    $search.addEventListener('input', debounce(()=>{ state.query = ($search.value||'').trim().toLowerCase(); state.page=1; renderTop(); }, 180));
+    $type.addEventListener('change', ()=>{ state.type = $type.value; state.page=1; buildTop(); saveUIState(); showToast('Filtro aplicado'); });
+    $sort.addEventListener('change', ()=>{ state.sort = $sort.value; state.page=1; renderTop(); saveUIState(); });
+    $pageSize.addEventListener('change', ()=>{ state.pageSize = parseInt($pageSize.value,10); state.page=1; renderTop(); saveUIState(); });
     $prev.addEventListener('click', ()=>{ if(state.page>1){ state.page--; renderTop(); } });
     $next.addEventListener('click', ()=>{ const max = Math.ceil(state.rows.length/state.pageSize)||1; if(state.page<max){ state.page++; renderTop(); } });
-    $btnReset.addEventListener('click', ()=>{
-      $search.value=''; state.query=''; $type.value='all'; state.type='all'; $sort.value='DESC'; state.sort='DESC';
-      state.page=1; state.pageSize=parseInt($pageSize.value,10);
-      buildTop(); showToast('Filtros reiniciados');
-    });
+    $btnReset.addEventListener('click', ()=>{ $search.value=''; state.query=''; $type.value='all'; state.type='all'; $sort.value='DESC'; state.sort='DESC'; state.page=1; state.pageSize=parseInt($pageSize.value,10); buildTop(); showToast('Filtros reiniciados'); });
 
     function precomputeCounts(){
-      memoCounts.clear();
       const types = ['all','normal','tarde','extra'];
       for(const t of types){ memoCounts.set(t, new Map()); }
       for(const r of ASIST){
         const user=r[1], tipo=r[2];
+        // all
         memoCounts.get('all').set(user,(memoCounts.get('all').get(user)||0)+1);
+        // specific
         if(memoCounts.has(tipo)) memoCounts.get(tipo).set(user,(memoCounts.get(tipo).get(user)||0)+1);
       }
     }
@@ -447,13 +368,16 @@
     function renderTop(){
       let rows = state.rows.slice();
 
+      // búsqueda
       if(state.query){ rows = rows.filter(r => r.user.toLowerCase().includes(state.query)); }
 
+      // orden
       if(state.sort === 'DESC') rows.sort((a,b)=> b.count - a.count);
       if(state.sort === 'ASC') rows.sort((a,b)=> a.count - b.count);
       if(state.sort === 'AZ') rows.sort((a,b)=> a.user.localeCompare(b.user));
       if(state.sort === 'ZA') rows.sort((a,b)=> b.user.localeCompare(a.user));
 
+      // paginación
       const total = rows.length;
       const maxPage = Math.max(1, Math.ceil(total / state.pageSize));
       if(state.page > maxPage) state.page = maxPage;
@@ -461,16 +385,18 @@
       const end = start + state.pageSize;
       const pageRows = rows.slice(start,end);
 
+      // pintar
       $list.innerHTML = '';
       const frag = document.createDocumentFragment();
       for(const r of pageRows){
-        const liName=document.createElement('li'); liName.innerHTML=`<span class="badge">${r.user}</span>`;
-        const liCount=document.createElement('li'); liCount.innerHTML=`<span class="count">${r.count}</span>`;
+        const liName=document.createElement('li'); liName.innerHTML=<span class="badge">${r.user}</span>;
+        const liCount=document.createElement('li'); liCount.innerHTML=<span class="count">${r.count}</span>;
         frag.appendChild(liName); frag.appendChild(liCount);
       }
       $list.appendChild(frag);
 
-      $pageInfo.textContent = `Página ${state.page} / ${maxPage} — ${total} usuarios`;
+      $pageInfo.textContent = Página ${state.page} / ${maxPage} — ${total} usuarios;
+      // scroll suave al inicio del listado
       $list.scrollTo({top:0, behavior:'smooth'});
     }
   </script>
