@@ -7,143 +7,189 @@
     
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Unifrakturka+Cook:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=Unifrakturka+Cook:wght@700&display=swap" rel="stylesheet">
+
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js'></script>
 
     <style>
-        /* --- 1. Tema Oscuro --- */
+        /* --- 1. Definición de la Paleta (CSS Variables) --- */
+        :root {
+            --font-title: 'Unifrakturka Cook', cursive;
+            --font-body: 'Roboto', sans-serif;
+
+            /* Paleta Dark Neon */
+            --color-bg-deep:   #0d0d0d; /* Fondo más oscuro (casi negro) */
+            --color-bg-medium: #1f1f1f; /* Header y Sidebar */
+            --color-bg-light:  #2a2a2a; /* Fondo del contenido */
+            --color-border:    #333333; /* Separadores */
+            
+            --color-text-primary:   #e0e0e0; /* Texto principal */
+            --color-text-secondary: #aaaaaa; /* Texto de la sidebar */
+
+            /* Paleta Neón (de tu imagen) */
+            --color-neon-purple: #9f50ff;
+            --color-neon-magenta: #e13fff;
+            --color-neon-hover:  #4a0072; /* Morado oscuro para hovers */
+
+            /* Colores de Asistencia */
+            --color-normal: #28a745;
+            --color-tarde:  #ffc107;
+            --color-extra:  #007bff;
+        }
+
+        /* --- 2. CSS Reset (Arreglo del Scrollbar) --- */
+        * {
+            box-sizing: border-box; /* Comportamiento de cajas predecible */
+        }
+        
         body, html {
             margin: 0;
             padding: 0;
-            font-family: Arial, sans-serif;
-            background-color: #121212;
-            color: #e0e0e0;
+            font-family: var(--font-body);
+            background-color: var(--color-bg-deep);
+            color: var(--color-text-primary);
             height: 100%;
-            overflow: hidden; /* Matar el scroll principal */
+            overflow: hidden; /* ¡Adiós al scrollbar principal! */
         }
 
-        /* --- Layout principal (¡CON EL ARREGLO!) --- */
+        /* --- 3. Layout Principal (¡Con el arreglo definitivo!) --- */
         #app-container {
             display: grid;
             grid-template-columns: 240px 1fr;
-            grid-template-rows: 60px 1fr;
+            /* Fila 1 (Header): 60px. Fila 2 (Contenido): El resto, sin desbordar */
+            grid-template-rows: 60px minmax(0, 1fr);
             grid-template-areas:
                 "header header"
                 "sidebar main";
-            height: 100%; /* <-- CAMBIADO DE 100vh a 100% */
+            height: 100%;
         }
 
-        /* --- 2. Header --- */
+        /* --- 4. Header (Cabecera) --- */
         #app-header {
             grid-area: header;
-            background-color: #1f1f1f;
-            color: #ffffff;
+            background-color: var(--color-bg-medium);
+            color: white;
             display: flex;
             align-items: center;
             padding: 0 20px;
-            border-bottom: 1px solid #333;
+            border-bottom: 1px solid var(--color-border);
         }
         
         #app-header h1 {
             margin: 0;
-            font-family: 'Unifrakturka Cook', cursive;
-            font-size: 2em;
-            background-image: linear-gradient(to right, #9f50ff, #e13fff);
+            font-family: var(--font-title);
+            font-size: 2.2em; /* Un poco más grande para el estilo */
+            
+            /* Gradiente Neón */
+            background-image: linear-gradient(to right, var(--color-neon-purple), var(--color-neon-magenta));
             -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
+            
+            /* Brillo Neón */
+            text-shadow: 0 0 5px var(--color-neon-purple), 0 0 10px var(--color-neon-purple);
         }
         
         #logo-placeholder {
             width: 40px;
             height: 40px;
-            background-color: #9f50ff;
+            background-color: var(--color-neon-purple);
             border-radius: 50%;
             margin-right: 15px;
+            box-shadow: 0 0 10px var(--color-neon-purple); /* Brillo en el logo */
         }
 
-        /* --- 3. Sidebar --- */
+        /* --- 5. Sidebar (Barra Lateral) --- */
         #app-sidebar {
             grid-area: sidebar;
-            background-color: #1f1f1f;
-            color: #e0e0e0;
+            background-color: var(--color-bg-medium);
+            color: var(--color-text-secondary);
             padding: 20px;
-            border-right: 1px solid #333;
+            border-right: 1px solid var(--color-border);
         }
         #app-sidebar h2 {
             margin-top: 0;
             color: white;
-            font-family: 'Unifrakturka Cook', cursive;
+            font-family: var(--font-title);
             font-size: 1.8em;
             text-align: center;
-            border-bottom: 1px solid #4a0072;
+            border-bottom: 1px solid var(--color-neon-hover);
             padding-bottom: 10px;
+            text-shadow: 0 0 5px var(--color-neon-purple);
         }
         #app-sidebar ul { list-style: none; padding: 0; }
         #app-sidebar li a {
             display: block;
             padding: 12px 15px;
             text-decoration: none;
-            color: #e0e0e0;
+            color: var(--color-text-secondary);
             border-radius: 5px;
             margin-bottom: 5px;
             font-size: 1.1em;
             cursor: pointer;
+            transition: background-color 0.3s ease, color 0.3s ease;
         }
         #app-sidebar li a:hover {
-            background-color: #4a0072;
+            background-color: var(--color-neon-hover);
             color: white;
         }
 
-        /* --- 4. Contenido Principal --- */
+        /* --- 6. Contenido Principal --- */
         #app-content {
             grid-area: main;
             padding: 30px;
-            overflow-y: auto; /* Este es el scroll que SÍ queremos */
+            overflow-y: auto; /* ¡Este es el scrollbar que SÍ queremos! */
         }
         
         .vista-contenido {
-            background: #242424;
+            background: var(--color-bg-light);
             padding: 20px;
             border-radius: 8px;
-            border: 1px solid #333;
+            border: 1px solid var(--color-border);
         }
 
-        /* --- 5. Estilos de Calendario y Detalles --- */
+        /* --- 7. Estilos FullCalendar (Dark Mode Pro) --- */
+        .fc { --fc-border-color: var(--color-border); } /* Borde del calendario */
         .fc .fc-toolbar-title { color: white; }
-        .fc .fc-daygrid-day-number { color: #e0e0e0; }
-        .fc .fc-col-header-cell-cushion { color: white; }
+        .fc .fc-daygrid-day-number { color: var(--color-text-primary); }
+        .fc .fc-col-header-cell-cushion { color: var(--color-text-secondary); }
         .fc .fc-button {
-            background-color: #4a0072;
-            border-color: #4a0072;
+            background-color: var(--color-neon-hover);
+            border-color: var(--color-neon-hover);
+            transition: background-color 0.3s ease;
         }
-        .fc .fc-button:hover { background-color: #7b1fa2; }
+        .fc .fc-button:hover { background-color: var(--color-neon-purple); }
+        .fc .fc-day-today { background-color: #333333; } /* Color para "Hoy" */
 
+        /* Día con Stream (Solo fondo, como pediste) */
         .fc-day-with-stream {
-            background-color: #3a0061 !important;
+            background-color: #3a0061 !important; /* Morado oscuro */
             cursor: pointer;
+            transition: background-color 0.3s ease;
         }
         .fc-day-with-stream:hover {
-            background-color: #4a0072 !important;
+            background-color: var(--color-neon-hover) !important; /* Más claro al pasar */
         }
 
+        /* --- 8. Vista de Detalles --- */
         #vista-detalles h2 { margin-top: 0; color: white; }
         #btn-volver {
             background: #6c757d; color: white; border: none;
             padding: 10px 15px; border-radius: 5px; cursor: pointer;
             font-size: 1em; margin-bottom: 20px;
+            transition: background-color 0.3s ease;
         }
         #btn-volver:hover { background: #5a6268; }
-        #detalles-lista { list-style: none; padding: 0; }
+        #detalles-lista { list-style-type: none; padding: 0; }
         #detalles-lista li {
-            padding: 10px;
-            border-bottom: 1px solid #333;
+            padding: 12px 10px;
+            border-bottom: 1px solid var(--color-border);
             font-size: 1.1em;
         }
         #detalles-lista li:last-child { border-bottom: none; }
-        #detalles-lista .tipo-normal { color: #28a745; }
-        #detalles-lista .tipo-tarde { color: #ffc107; }
-        #detalles-lista .tipo-extra { color: #007bff; }
+        #detalles-lista .tipo-normal { color: var(--color-normal); font-weight: bold; }
+        #detalles-lista .tipo-tarde  { color: var(--color-tarde); font-weight: bold; }
+        #detalles-lista .tipo-extra  { color: var(--color-extra); font-weight: bold; }
     </style>
 </head>
 <body>
