@@ -5,23 +5,21 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Asistencia de Abdara</title>
     
-    <!-- 1. Importamos la fuente Gótica de Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Unifrakturka+Cook:wght@700&display=swap" rel="stylesheet">
-
-    <!-- 2. Librería de FullCalendar -->
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js'></script>
 
     <style>
-        /* --- 1. Tema Oscuro (NUEVO) --- */
+        /* --- 1. Tema Oscuro (¡CON EL ARREGLO!) --- */
         body, html {
             margin: 0;
             padding: 0;
             font-family: Arial, sans-serif;
-            background-color: #121212; /* Fondo negro/gris oscuro */
-            color: #e0e0e0; /* Texto claro */
+            background-color: #121212;
+            color: #e0e0e0;
             height: 100%;
+            overflow: hidden; /* <-- ¡AQUÍ ESTÁ LA MAGIA! Esto mata el scrollbar principal */
         }
 
         /* --- Layout principal (Sin cambios) --- */
@@ -32,58 +30,53 @@
             grid-template-areas:
                 "header header"
                 "sidebar main";
-            height: 100vh;
+            height: 100vh; /* Ocupar toda la altura (que ya no se desborda) */
         }
 
-        /* --- 2. Header (NUEVO ESTILO) --- */
+        /* --- 2. Header (Sin cambios) --- */
         #app-header {
             grid-area: header;
-            background-color: #1f1f1f; /* Fondo de header (un poco más claro) */
+            background-color: #1f1f1f;
             color: #ffffff;
             display: flex;
             align-items: center;
             padding: 0 20px;
-            border-bottom: 1px solid #333; /* Borde oscuro */
+            border-bottom: 1px solid #333;
         }
         
         #app-header h1 {
             margin: 0;
-            /* Aplicamos la fuente Gótica */
             font-family: 'Unifrakturka Cook', cursive;
-            font-size: 2em; /* Más grande */
-            
-            /* ---- El truco del Gradiente ---- */
+            font-size: 2em;
             background-image: linear-gradient(to right, #9f50ff, #e13fff);
-            -webkit-background-clip: text; /* Para Chrome/Safari */
+            -webkit-background-clip: text;
             background-clip: text;
             color: transparent;
-            /* ---------------------------------- */
         }
         
         #logo-placeholder {
             width: 40px;
             height: 40px;
-            background-color: #9f50ff; /* Morado del gradiente */
+            background-color: #9f50ff;
             border-radius: 50%;
             margin-right: 15px;
-            /* background-image: url('URL_DE_TU_LOGO.png'); */
         }
 
-        /* --- 3. Sidebar (NUEVO ESTILO) --- */
+        /* --- 3. Sidebar (Sin cambios) --- */
         #app-sidebar {
             grid-area: sidebar;
-            background-color: #1f1f1f; /* Igual que el header */
+            background-color: #1f1f1f;
             color: #e0e0e0;
             padding: 20px;
-            border-right: 1px solid #333; /* Borde oscuro */
+            border-right: 1px solid #333;
         }
         #app-sidebar h2 {
             margin-top: 0;
             color: white;
-            font-family: 'Unifrakturka Cook', cursive; /* Fuente gótica aquí también */
+            font-family: 'Unifrakturka Cook', cursive;
             font-size: 1.8em;
             text-align: center;
-            border-bottom: 1px solid #4a0072; /* Morado oscuro */
+            border-bottom: 1px solid #4a0072;
             padding-bottom: 10px;
         }
         #app-sidebar ul { list-style: none; padding: 0; }
@@ -98,60 +91,46 @@
             cursor: pointer;
         }
         #app-sidebar li a:hover {
-            background-color: #4a0072; /* Morado oscuro al pasar el mouse */
+            background-color: #4a0072;
             color: white;
         }
 
-        /* --- 4. Contenido Principal (NUEVO ESTILO) --- */
+        /* --- 4. Contenido Principal (¡Aquí está la clave!) --- */
         #app-content {
             grid-area: main;
             padding: 30px;
-            overflow-y: auto;
+            /* * Esta es la línea importante.
+             * Si el contenido (la lista de detalles) es muy largo,
+             * ESTE contenedor tendrá scroll, no la página.
+             */
+            overflow-y: auto; 
         }
         
         .vista-contenido {
-            background: #242424; /* Fondo de contenido (más claro que el body) */
+            background: #242424;
             padding: 20px;
             border-radius: 8px;
             border: 1px solid #333;
         }
 
-        /* --- 5. Forzar FullCalendar a Dark Mode (NUEVO) --- */
-        /* Color del título (ej: "noviembre 2025") */
-        .fc .fc-toolbar-title {
-            color: white;
-        }
-        /* Color de los números del día */
-        .fc .fc-daygrid-day-number {
-            color: #e0e0e0;
-        }
-        /* Color de los nombres de la semana (lun, mar, mie...) */
-        .fc .fc-col-header-cell-cushion {
-            color: white;
-        }
-        /* Botones (today, prev, next) */
+        /* --- 5. Estilos de Calendario y Detalles (Sin cambios) --- */
+        .fc .fc-toolbar-title { color: white; }
+        .fc .fc-daygrid-day-number { color: #e0e0e0; }
+        .fc .fc-col-header-cell-cushion { color: white; }
         .fc .fc-button {
             background-color: #4a0072;
             border-color: #4a0072;
         }
-        .fc .fc-button:hover {
-            background-color: #7b1fa2;
-        }
+        .fc .fc-button:hover { background-color: #7b1fa2; }
 
-        /*
-         * ¡AQUÍ ESTÁ TU CAMBIO!
-         * Esto pinta el fondo del DÍA (la celda entera)
-         * de un color morado oscuro si hubo stream.
-         */
         .fc-day-with-stream {
-            background-color: #3a0061 !important; /* Morado oscuro (un poco claro) */
+            background-color: #3a0061 !important;
             cursor: pointer;
         }
         .fc-day-with-stream:hover {
-            background-color: #4a0072 !important; /* Más claro al pasar el mouse */
+            background-color: #4a0072 !important;
         }
 
-        /* --- Estilos de la vista de Detalles (Dark Mode) --- */
         #vista-detalles h2 { margin-top: 0; color: white; }
         #btn-volver {
             background: #6c757d; color: white; border: none;
@@ -162,11 +141,10 @@
         #detalles-lista { list-style-type: none; padding: 0; }
         #detalles-lista li {
             padding: 10px;
-            border-bottom: 1px solid #333; /* Borde oscuro */
+            border-bottom: 1px solid #333;
             font-size: 1.1em;
         }
         #detalles-lista li:last-child { border-bottom: none; }
-        /* Colores de asistencia */
         #detalles-lista .tipo-normal { color: #28a745; }
         #detalles-lista .tipo-tarde { color: #ffc107; }
         #detalles-lista .tipo-extra { color: #007bff; }
@@ -174,16 +152,13 @@
 </head>
 <body>
 
-    <!-- Esta es la nueva estructura profesional -->
     <div id="app-container">
         
-        <!-- 1. HEADER -->
         <header id="app-header">
             <div id="logo-placeholder"></div>
             <h1>Calendario de Asistencia Abdara 12</h1>
         </header>
 
-        <!-- 2. SIDEBAR -->
         <aside id="app-sidebar">
             <h2>Navegación</h2>
             <ul>
@@ -192,22 +167,17 @@
             </ul>
         </aside>
 
-        <!-- 3. MAIN CONTENT -->
         <main id="app-content">
 
-            <!-- "Vista" 1: El Calendario (se muestra por defecto) -->
             <div id="vista-calendario" class="vista-contenido">
-                <!-- El calendario se dibujará aquí -->
-            </div>
+                </div>
 
-            <!-- "Vista" 2: Detalles del Día (oculta por defecto) -->
             <div id="vista-detalles" class="vista-contenido" style="display: none;">
                 <button id="btn-volver">&larr; Volver al Calendario</button>
                 <h2 id="detalles-titulo"></h2>
                 <ul id="detalles-lista"></ul>
             </div>
 
-            <!-- "Vista" 3: Top 3 (oculta por defecto) -->
             <div id="vista-top3" class="vista-contenido" style="display: none;">
                 <button id="btn-volver-top3">&larr; Volver al Calendario</button>
                 <h2>Top 3 Asistencias</h2>
@@ -268,9 +238,6 @@
         function renderizarCalendario(streams, asistencias) {
             const calendarioEl = document.getElementById('vista-calendario');
             
-            // ¡YA NO CREAMOS EL ARRAY DE "eventos"!
-            // Con esto eliminamos la barra azul "Stream".
-
             const calendar = new FullCalendar.Calendar(calendarioEl, {
                 initialView: 'dayGridMonth',
                 locale: 'es',
@@ -281,9 +248,6 @@
                     right: 'dayGridMonth,timeGridWeek'
                 },
                 
-                // events: eventos, // <-- LÍNEA ELIMINADA
-
-                // Esto pinta el fondo del DÍA (lo que querías)
                 dayCellDidMount: function(arg) {
                     const fechaSimple = arg.date.toISOString().split('T')[0];
                     if (streams[fechaSimple]) {
@@ -291,22 +255,18 @@
                     }
                 },
                 
-                // Al hacer clic en un día
                 dateClick: function(info) {
                     const fechaSimpleClick = info.dateStr;
 
-                    // Si el día no tuvo stream (revisando 'streams'), no hacer nada
                     if (!streams[fechaSimpleClick]) {
                         return;
                     }
                     
-                    // Buscar asistencias de ESE día
                     const asistenciasDelDia = asistencias.filter(a => {
                         const fechaAsistencia = new Date(a[0]).toLocaleDateString('en-CA', { timeZone: TIME_ZONE });
                         return fechaAsistencia === fechaSimpleClick;
                     });
                     
-                    // Llenar la nueva vista
                     document.getElementById('detalles-titulo').innerText = `Asistencias del ${fechaSimpleClick}`;
                     const listaEl = document.getElementById('detalles-lista');
                     listaEl.innerHTML = ""; 
@@ -323,7 +283,6 @@
                         listaEl.innerHTML = "<li>No se registraron asistencias.</li>";
                     }
                     
-                    // Mostrar la vista de detalles
                     mostrarVista('vista-detalles');
                 }
             });
