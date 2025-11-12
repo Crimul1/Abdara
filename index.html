@@ -1,358 +1,324 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Asistencia Abdara12</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Calendario de Asistencia Abdara12</title>
 
-<!-- Google Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 
-<!-- FullCalendar -->
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js"></script>
+  <!-- FullCalendar -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js"></script>
 
-<style>
-/* ================= ROOT COLORS ================= */
-:root{
-    --font-title: 'UnifrakturCook', cursive;
-    --font-body: 'Roboto', sans-serif;
+  <style>
+    :root{
+      --font-title: 'UnifrakturCook', cursive;
+      --font-body: 'Roboto', sans-serif;
 
-    --bg-deep: #080808;
-    --bg-mid: #111;
-    --bg-card: #181818;
-    --border: #282828;
+      /* Dark Neon */
+      --bg-deep:#080808;   /* body */
+      --bg-mid:#111111;    /* header/sidebar */
+      --bg-card:#161616;   /* cards */
+      --bg-wash:#0e0e0e;   /* subtle panels */
+      --border:#272727;
 
-    --text-primary: #e8e8e8;
-    --text-secondary: #9c9c9c;
+      --text:#e8e8e8;
+      --text-dim:#a7a7a7;
 
-    --neon-purple: #8d3aff;
-    --neon-pink: #ff38c7;
-    --neon-dark: #3a0061;
+      --neon-purple:#8d3aff;
+      --neon-pink:#ff38c7;
+      --neon-dark:#3a0061;
+      --neon-dim:#280042;
 
-    --green: #00ff8f;
-    --yellow: #f0ff45;
-    --blue: #00b7ff;
-}
+      --ok:#00ff9d;
+      --warn:#ffe256;
+      --info:#00b7ff;
+    }
 
-/* ================= RESET ================= */
-*{
-    margin:0;
-    padding:0;
-    box-sizing:border-box;
-}
+    /* Reset */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%}
+    body{font-family:var(--font-body);background:var(--bg-deep);color:var(--text);overflow:hidden}
 
-body{
-    height:100vh;
-    background: var(--bg-deep);
-    color:var(--text-primary);
-    font-family:var(--font-body);
-    overflow:hidden;
-}
+    .neonGlow{ text-shadow: 0 0 6px var(--neon-purple), 0 0 18px var(--neon-purple), 0 0 28px var(--neon-pink); }
+    .gradientText{ background:linear-gradient(90deg,var(--neon-purple),var(--neon-pink)); -webkit-background-clip:text; background-clip:text; color:transparent; }
 
-/* ================= GLOW FX ================= */
-.neonGlow{
-    text-shadow:
-    0 0 4px var(--neon-purple),
-    0 0 12px var(--neon-purple),
-    0 0 24px var(--neon-pink);
-}
+    /* Layout */
+    #app{ display:grid; grid-template-columns:260px 1fr; grid-template-rows:76px 1fr; grid-template-areas:"header header" "sidebar main"; height:100%; }
 
-/* ================= LAYOUT ================= */
-#app{
-    display:grid;
-    grid-template-columns:240px 1fr;
-    grid-template-rows:72px 1fr;
-    grid-template-areas:
-        "header header"
-        "sidebar main";
-    height:100%;
-}
+    header{ grid-area:header; display:flex; align-items:center; gap:14px; padding:0 24px; background:var(--bg-mid); border-bottom:1px solid var(--border); }
+    header h1{ font-family:var(--font-title); font-size:2.6rem; line-height:1; }
 
-/* ================= HEADER ================= */
-header{
-    grid-area:header;
-    display:flex;
-    align-items:center;
-    padding:0 24px;
-    background:var(--bg-mid);
-    border-bottom:1px solid var(--border);
-}
+    aside{ grid-area:sidebar; padding:22px; background:var(--bg-mid); border-right:1px solid var(--border); }
+    aside h2{ font-family:var(--font-title); font-size:1.8rem; text-align:center; color:var(--neon-purple); text-shadow:0 0 10px var(--neon-purple); margin-bottom:10px; }
+    .nav{ list-style:none; margin-top:12px; display:flex; flex-direction:column; gap:10px; }
+    .nav a{ display:block; padding:10px 14px; background:#131313; border:1px solid var(--border); border-radius:8px; color:var(--text-dim); text-decoration:none; transition:.25s; cursor:pointer; }
+    .nav a:hover{ color:#fff; background:var(--neon-dim); box-shadow:0 0 14px var(--neon-purple); }
 
-header h1{
-    font-family:var(--font-title);
-    font-size:2.4rem;
-    background:linear-gradient(90deg, var(--neon-purple), var(--neon-pink));
-    -webkit-background-clip:text;
-    color:transparent;
-    text-shadow:0 0 10px var(--neon-purple);
-    animation:fadeDown .7s ease;
-}
+    main{ grid-area:main; position:relative; padding:24px; background:linear-gradient(180deg,#0a0a0a 0%, #0b0013 100%); }
 
-/* ================= SIDEBAR ================= */
-aside{
-    grid-area:sidebar;
-    padding:24px;
-    background:var(--bg-mid);
-    border-right:1px solid var(--border);
-    animation:fadeLeft .6s ease;
-}
+    /* Cards */
+    .card{ background:var(--bg-card); border:1px solid var(--border); border-radius:12px; padding:18px; box-shadow: inset 0 0 0 1px rgba(255,255,255,0.02), 0 0 24px rgba(141,58,255,0.08); }
 
-aside h2{
-    font-family:var(--font-title);
-    text-align:center;
-    color:var(--neon-purple);
-    margin-bottom:12px;
-    font-size:1.8rem;
-    text-shadow:0 0 6px var(--neon-purple);
-}
+    /* Calendar container: FIXED (sin scroll) */
+    #calendarWrap{ height: calc(100% - 0px); /* ocupa todo el main */ display:flex; flex-direction:column; }
+    #calendarCard{ flex:1; min-height:0; display:flex; }
+    #calendar{ flex:1; min-height:0; }
 
-aside ul{
-    list-style:none;
-    margin-top:16px;
-}
+    /* FullCalendar theme */
+    .fc{ --fc-border-color:var(--border); }
+    .fc .fc-toolbar-title{ font-family:var(--font-title); color:#fff; text-shadow:0 0 12px var(--neon-purple); }
+    .fc .fc-button{ background:var(--neon-dark)!important; border:none!important; color:#fff!important; transition:.25s; }
+    .fc .fc-button:hover{ background:var(--neon-purple)!important; box-shadow:0 0 12px var(--neon-purple); }
+    .fc .fc-daygrid-day-number{ color:var(--text); }
+    .fc .fc-col-header-cell-cushion{ color:var(--text-dim); }
+    .fc-theme-standard td, .fc-theme-standard th{ border-color:var(--border); }
+    .fc-day-today{ background:#171117!important; }
 
-aside li a{
-    display:block;
-    padding:10px 14px;
-    background:#131313;
-    color:var(--text-secondary);
-    border:1px solid var(--border);
-    border-radius:6px;
-    margin-bottom:10px;
-    cursor:pointer;
-    transition:.25s;
-}
+    .fc-day-with-stream{ background:#2a0047!important; transition:.25s; }
+    .fc-day-with-stream:hover{ background:#43007a!important; box-shadow:inset 0 0 12px var(--neon-purple); }
 
-aside li a:hover{
-    background:var(--neon-dark);
-    color:white;
-    box-shadow:0 0 12px var(--neon-purple);
-}
+    /* Buttons */
+    .btn{ background:var(--neon-dark); border:1px solid var(--neon-purple); color:#fff; padding:8px 12px; border-radius:8px; cursor:pointer; transition:.25s; }
+    .btn:hover{ background:var(--neon-purple); box-shadow:0 0 12px var(--neon-purple); }
 
-/* ================= MAIN ================= */
-main{
-    grid-area:main;
-    padding:28px;
-    overflow-y:auto;
-    background:var(--bg-deep);
-    animation:fade .5s ease;
-}
+    /* Views */
+    .view{ display:none; animation:fade .4s ease; }
+    .view.active{ display:block; }
 
-.card{
-    background:var(--bg-card);
-    border:1px solid var(--border);
-    padding:20px;
-    border-radius:10px;
-    animation:fade .5s ease;
-}
+    /* Top Asistencias panel */
+    .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin-bottom:12px; }
+    .input, .select{ background:#131313; border:1px solid var(--border); color:#fff; padding:8px 12px; border-radius:8px; outline:none; }
+    .input:focus, .select:focus{ border-color:var(--neon-purple); box-shadow:0 0 10px var(--neon-purple); }
 
-/* ================= FULLCALENDAR ================= */
-.fc{
-    --fc-border-color:var(--border);
-}
-.fc .fc-toolbar-title{
-    color:var(--neon-purple);
-    font-family:var(--font-title);
-    text-shadow:0 0 10px var(--neon-purple);
-}
-.fc-button{
-    background:var(--neon-dark) !important;
-    border:none !important;
-    color:white !important;
-    transition:.3s;
-}
-.fc-button:hover{
-    background:var(--neon-purple) !important;
-    box-shadow:0 0 10px var(--neon-purple);
-}
-.fc-daygrid-day-number{
-    color:var(--text-primary);
-}
-.fc-col-header-cell{
-    color:var(--text-secondary);
-}
+    .list{ list-style:none; display:grid; grid-template-columns: 1fr auto; row-gap:8px; column-gap:12px; padding:0; }
+    .list li{ padding:10px 0; border-bottom:1px dashed var(--border); }
+    .badge{ font-weight:700; }
+    .count{ color:var(--neon-pink); }
 
-/* DÍAS CON STREAM */
-.fc-day-with-stream{
-    background:#300052 !important;
-    transition:.3s;
-}
-.fc-day-with-stream:hover{
-    background:#52008a !important;
-    box-shadow:inset 0 0 12px var(--neon-purple);
-}
+    .pager{ display:flex; align-items:center; gap:10px; justify-content:flex-end; margin-top:12px; }
 
-/* ================= ANIMACIONES ================= */
-@keyframes fade{
-    0%{ opacity:0; }
-    100%{ opacity:1; }
-}
-@keyframes fadeLeft{
-    0%{ opacity:0; transform:translateX(-40px); }
-    100%{ opacity:1; transform:translateX(0); }
-}
-@keyframes fadeDown{
-    0%{ opacity:0; transform:translateY(-30px); }
-    100%{ opacity:1; transform:translateY(0); }
-}
-</style>
+    /* Animations */
+    @keyframes fade{ from{opacity:0} to{opacity:1} }
+  </style>
 </head>
-
 <body>
 
-<audio id="sfx" src="https://cdn.freesound.org/previews/656/656770_1648170-lq.mp3"></audio>
+  <!-- SFX (suave) -->
+  <audio id="sfx" src="https://cdn.freesound.org/previews/656/656770_1648170-lq.mp3"></audio>
 
-<div id="app">
-
-    <!-- HEADER -->
+  <div id="app">
     <header>
-        <h1 class="neonGlow">Calendario de Asistencia Abdara12</h1>
+      <h1 class="gradientText neonGlow">Calendario de Asistencia Abdara12</h1>
     </header>
 
-    <!-- SIDEBAR -->
     <aside>
-        <h2>Navegación</h2>
-        <ul>
-            <li><a id="link-calendario">Calendario</a></li>
-            <li><a id="link-top">Top 3</a></li>
-        </ul>
+      <h2>Menú</h2>
+      <ul class="nav">
+        <li><a id="nav-cal">Calendario</a></li>
+        <li><a id="nav-top">Top Asistencias</a></li>
+      </ul>
     </aside>
 
-    <!-- MAIN -->
     <main>
-        <div id="vista-calendario" class="card"></div>
-
-        <div id="vista-detalles" class="card" style="display:none">
-            <button id="volver">&larr; Volver</button>
-            <h2 id="titulo-detalle"></h2>
-            <ul id="listado"></ul>
+      <!-- CALENDAR VIEW (fijo, sin scroll) -->
+      <section id="view-cal" class="view active">
+        <div id="calendarWrap" class="card">
+          <div id="calendarCard" class="card" style="background:transparent; border:none; box-shadow:none;">
+            <div id="calendar"></div>
+          </div>
         </div>
+      </section>
 
-        <div id="vista-top" class="card" style="display:none">
-            <button id="volverTop">&larr; Volver</button>
-            <h2 class="neonGlow">Top 3 Asistencias</h2>
-            <ul id="listaTop3"></ul>
+      <!-- TOP ASISTENCIAS (completo + filtros + orden + paginación) -->
+      <section id="view-top" class="view">
+        <div class="card">
+          <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:10px;">
+            <h2 class="gradientText neonGlow" style="font-family:var(--font-title);">Top Asistencias</h2>
+            <button class="btn" id="btn-back">&larr; Volver</button>
+          </div>
+
+          <!-- Controles -->
+          <div class="controls">
+            <input id="search" class="input" placeholder="Buscar por nombre..." />
+            <select id="type" class="select">
+              <option value="all">Todos los tipos</option>
+              <option value="normal">Solo Normal</option>
+              <option value="tarde">Solo Tarde</option>
+              <option value="extra">Solo Extra</option>
+            </select>
+            <select id="sort" class="select">
+              <option value="DESC">Mayor → Menor</option>
+              <option value="ASC">Menor → Mayor</option>
+              <option value="AZ">Nombre A → Z</option>
+              <option value="ZA">Nombre Z → A</option>
+            </select>
+            <select id="pageSize" class="select">
+              <option value="10">10 por página</option>
+              <option value="15" selected>15 por página</option>
+              <option value="25">25 por página</option>
+              <option value="50">50 por página</option>
+            </select>
+          </div>
+
+          <!-- Listado -->
+          <ul id="list" class="list" aria-live="polite"></ul>
+
+          <!-- Paginación -->
+          <div class="pager">
+            <span id="pageInfo" style="color:var(--text-dim)"></span>
+            <button class="btn" id="prev">Anterior</button>
+            <button class="btn" id="next">Siguiente</button>
+          </div>
         </div>
-
+      </section>
     </main>
-</div>
+  </div>
 
-<script>
-/* ===================== CONFIG ===================== */
-const API_URL =
-"https://script.google.com/macros/s/AKfycbx6WjqODhuetXMwsAtzfvXY539Quj1exnRz7s7J6FQBH2UAlag6Brs6InxPsRS3uq2F/exec?webAction=get_all_data";
-const ZONE = "America/Guatemala";
-let DATOS_STREAM, DATOS_ASIST;
+  <script>
+    /* ===================== CONFIG ===================== */
+    const API_URL = "https://script.google.com/macros/s/AKfycbx6WjqODhuetXMwsAtzfvXY539Quj1exnRz7s7J6FQBH2UAlag6Brs6InxPsRS3uq2F/exec?webAction=get_all_data";
+    const ZONE = "America/Guatemala";
 
-/* ===================== UTILS ===================== */
-function show(id){
-    document.getElementById("vista-calendario").style.display="none";
-    document.getElementById("vista-detalles").style.display="none";
-    document.getElementById("vista-top").style.display="none";
-    document.getElementById(id).style.display="block";
-}
+    let STREAMS = {};
+    let ASIST = [];
 
-/* ===================== SFX ===================== */
-function playSFX(){
-    const s = document.getElementById("sfx");
-    s.volume = 0.35;
-    s.currentTime = 0;
-    s.play();
-}
-
-/* ===================== INIT ===================== */
-document.addEventListener("DOMContentLoaded", ()=>{
-    loadData();
-
-    document.getElementById("link-calendario").onclick=()=>show("vista-calendario");
-    document.getElementById("link-top").onclick=()=>{
-        fillTop();
-        show("vista-top");
-        playSFX();
+    // Estado Top Asistencias
+    const state = {
+      query: "",
+      type: "all",
+      sort: "DESC",
+      page: 1,
+      pageSize: 15,
+      rows: [] // [{user, count}]
     };
-    document.getElementById("volver").onclick=()=>show("vista-calendario");
-    document.getElementById("volverTop").onclick=()=>show("vista-calendario");
-});
 
-/* ===================== GET DATA ===================== */
-async function loadData(){
-    const r = await fetch(API_URL);
-    const d = await r.json();
-    DATOS_STREAM = d.streams;
-    DATOS_ASIST = d.asistencia;
-    renderCalendar();
-}
+    /* ===================== NAV ===================== */
+    const viewCal = document.getElementById('view-cal');
+    const viewTop = document.getElementById('view-top');
+    const navCal = document.getElementById('nav-cal');
+    const navTop = document.getElementById('nav-top');
+    const btnBack = document.getElementById('btn-back');
 
-/* ===================== CALENDAR ===================== */
-function renderCalendar(){
-    const el = document.getElementById("vista-calendario");
+    function playSFX(){ const s=document.getElementById('sfx'); try{ s.volume=0.35; s.currentTime=0; s.play(); }catch(e){} }
 
-    const calendar = new FullCalendar.Calendar(el,{
-        initialView: "dayGridMonth",
-        locale:"es",
-        timeZone:ZONE,
-        headerToolbar:{
-            left:"prev,next today",
-            center:"title",
-            right:"dayGridMonth,timeGridWeek"
-        },
+    function show(view){
+      viewCal.classList.remove('active');
+      viewTop.classList.remove('active');
+      if(view === 'cal') viewCal.classList.add('active');
+      if(view === 'top') viewTop.classList.add('active');
+    }
 
+    navCal.addEventListener('click', ()=>{ show('cal'); });
+    navTop.addEventListener('click', ()=>{ buildTop(); show('top'); playSFX(); });
+    btnBack.addEventListener('click', ()=>{ show('cal'); });
+
+    /* ===================== LOAD DATA ===================== */
+    document.addEventListener('DOMContentLoaded', async ()=>{
+      const res = await fetch(API_URL);
+      const json = await res.json();
+      STREAMS = json.streams || {};
+      ASIST = json.asistencia || [];
+      initCalendar();
+    });
+
+    /* ===================== CALENDAR ===================== */
+    function initCalendar(){
+      const el = document.getElementById('calendar');
+      const cal = new FullCalendar.Calendar(el,{
+        height: '100%',              // Ocupa todo el contenedor
+        expandRows: true,
+        initialView:'dayGridMonth',
+        locale:'es',
+        timeZone: ZONE,
+        headerToolbar:{ left:'prev,next today', center:'title', right:'dayGridMonth,timeGridWeek' },
         dayCellDidMount(arg){
-            const f = arg.date.toISOString().split("T")[0];
-            if(DATOS_STREAM[f]) arg.el.classList.add("fc-day-with-stream");
+          const iso = arg.date.toISOString().split('T')[0];
+          if(STREAMS[iso]) arg.el.classList.add('fc-day-with-stream');
         },
-
         dateClick(info){
-            const f = info.dateStr;
-            if(!DATOS_STREAM[f]) return;
+          const f = info.dateStr;
+          if(!STREAMS[f]) return;
 
-            const list = DATOS_ASIST.filter(a=>{
-                const fa = new Date(a[0]).toLocaleDateString("en-CA",{timeZone:ZONE});
-                return fa===f;
-            });
-
-            document.getElementById("titulo-detalle").innerText=`Asistencias ${f}`;
-            const ul = document.getElementById("listado");
-            ul.innerHTML="";
-
-            list.length
-            ? list.forEach(a=>{
-                const li=document.createElement("li");
-                li.textContent=`${a[1]} (${a[2]})`;
-                ul.appendChild(li);
-            })
-            : ul.innerHTML="<li>Sin registros</li>";
-
-            show("vista-detalles");
-            playSFX();
+          const list = ASIST.filter(a=> new Date(a[0]).toLocaleDateString('en-CA',{timeZone:ZONE}) === f);
+          const lines = list.length ? list.map(a=>`• ${a[1]} (${a[2]})`).join('\n') : 'Sin registros.';
+          alert(`Asistencias ${f}\n\n${lines}`); // modal simple; puedes cambiar por modal custom si quieres
+          playSFX();
         }
-    });
+      });
+      cal.render();
+    }
 
-    calendar.render();
-}
+    /* ===================== TOP ASISTENCIAS ===================== */
+    const $search = document.getElementById('search');
+    const $type = document.getElementById('type');
+    const $sort = document.getElementById('sort');
+    const $pageSize = document.getElementById('pageSize');
+    const $list = document.getElementById('list');
+    const $pageInfo = document.getElementById('pageInfo');
+    const $prev = document.getElementById('prev');
+    const $next = document.getElementById('next');
 
-/* ===================== TOP ===================== */
-function fillTop(){
-    const count={};
-    DATOS_ASIST.forEach(r=>{
-        if(r[2]==="normal" || r[2]==="tarde"){
-            count[r[1]] = (count[r[1]]||0)+1;
-        }
-    });
+    $search.addEventListener('input', ()=>{ state.query = $search.value.trim().toLowerCase(); state.page=1; renderTop(); });
+    $type.addEventListener('change', ()=>{ state.type = $type.value; state.page=1; buildTop(); });
+    $sort.addEventListener('change', ()=>{ state.sort = $sort.value; state.page=1; renderTop(); });
+    $pageSize.addEventListener('change', ()=>{ state.pageSize = parseInt($pageSize.value,10); state.page=1; renderTop(); });
+    $prev.addEventListener('click', ()=>{ if(state.page>1){ state.page--; renderTop(); } });
+    $next.addEventListener('click', ()=>{ const max = Math.ceil(state.rows.length/state.pageSize)||1; if(state.page<max){ state.page++; renderTop(); } });
 
-    const top = Object.entries(count).sort((a,b)=>b[1]-a[1]).slice(0,3);
-    const list = document.getElementById("listaTop3");
-    list.innerHTML="";
+    function buildTop(){
+      // contar por usuario según tipo seleccionado
+      const useType = state.type; // all | normal | tarde | extra
+      const counter = new Map();
+      for(const r of ASIST){
+        const fecha = r[0];
+        const user = r[1];
+        const tipo = r[2];
+        if(useType !== 'all' && tipo !== useType) continue;
+        counter.set(user, (counter.get(user)||0) + 1);
+      }
+      state.rows = Array.from(counter.entries()).map(([user,count])=>({user, count}));
+      renderTop();
+    }
 
-    top.forEach(u=>{
-        const li=document.createElement("li");
-        li.textContent=`${u[0]} (${u[1]})`;
-        list.appendChild(li);
-    });
-}
-</script>
+    function renderTop(){
+      let rows = state.rows.slice();
 
+      // búsqueda
+      if(state.query){ rows = rows.filter(r => r.user.toLowerCase().includes(state.query)); }
+
+      // orden
+      if(state.sort === 'DESC') rows.sort((a,b)=> b.count - a.count);
+      if(state.sort === 'ASC') rows.sort((a,b)=> a.count - b.count);
+      if(state.sort === 'AZ') rows.sort((a,b)=> a.user.localeCompare(b.user));
+      if(state.sort === 'ZA') rows.sort((a,b)=> b.user.localeCompare(a.user));
+
+      // paginación
+      const total = rows.length;
+      const maxPage = Math.max(1, Math.ceil(total / state.pageSize));
+      if(state.page > maxPage) state.page = maxPage;
+      const start = (state.page-1)*state.pageSize;
+      const end = start + state.pageSize;
+      const pageRows = rows.slice(start,end);
+
+      // pintar
+      $list.innerHTML = '';
+      for(const r of pageRows){
+        const name = `<span class="badge">${r.user}</span>`;
+        const count = `<span class="count">${r.count}</span>`;
+        const liName = document.createElement('li');
+        const liCount = document.createElement('li');
+        liName.innerHTML = name;
+        liCount.innerHTML = count;
+        $list.appendChild(liName);
+        $list.appendChild(liCount);
+      }
+
+      $pageInfo.textContent = `Página ${state.page} / ${maxPage} — ${total} usuarios`;
+    }
+  </script>
 </body>
 </html>
