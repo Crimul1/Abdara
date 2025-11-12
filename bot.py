@@ -15,7 +15,7 @@ BOT_NAME = "crimul_bot"
 CHANNEL = "abdara12"
 BROADCASTER_ID = "930537744"
 
-GAS_URL = "https://script.google.com/macros/s/AKfycbx6WjqODhuetXMwsAtzfvXY539Quj1exnRz7s7J6FQBH2UAlag6Brs6InxPsRS3uq2F/exec"
+GAS_URL = "https://script.google.com/macros/s/AKfycbx9FbsvqV8ZtLfspZ76RINloLcGUHhtOLT6S-B38v_vikqLtCO9zu2ec2lIYiJBkdVv/exec"
 POLL_SECONDS = 60
 # =====================================
 
@@ -113,3 +113,4 @@ if __name__ == "__main__":
     STREAM_ONLINE = False
     print("=== BOT ASISTENCIA — INICIO ===")
     asyncio.run(main())
+
