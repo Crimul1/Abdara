@@ -1,506 +1,478 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-<meta charset="UTF-8"/>
-<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
-<title>Asistencia Abdara12</title>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Calendario de Asistencia Abdara12</title>
 
-<!-- Fonts -->
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
+  <!-- Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 
-<!-- FullCalendar -->
-<script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js"></script>
+  <!-- FullCalendar -->
+  <script src="https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js"></script>
 
-<style>
-:root{
-  --font-title:'UnifrakturCook',cursive;
-  --font-body:'Roboto',sans-serif;
+  <style>
+    :root{
+      --font-title: 'UnifrakturCook', cursive;
+      --font-body: 'Roboto', sans-serif;
 
-  --deep:#080808;
-  --mid:#101010;
-  --card:#151515;
-  --b:#262626;
+      /* Dark Neon */
+      --bg-deep:#080808;   /* body */
+      --bg-mid:#101010;    /* header/sidebar */
+      --bg-card:#151515;   /* cards */
+      --border:#262626;
 
-  --t:#ededed;
-  --td:#a9a9a9;
+      --text:#ededed;
+      --text-dim:#a9a9a9;
 
-  --p:#8d3aff;
-  --k:#ff38c7;
-  --d:#3a0061;
+      --neon-purple:#8d3aff;
+      --neon-pink:#ff38c7;
+      --neon-dark:#3a0061;
 
-  --ok:#00ff9d;
-  --warn:#ffe256;
-  --info:#00b7ff;
+      --ok:#00ff9d;
+      --warn:#ffe256;
+      --info:#00b7ff;
 
-  --H:70px;
-  --W:260px;
-}
+      --header-h:72px;
+      --sidebar-w:270px;
+    }
 
-*{box-sizing:border-box;margin:0;padding:0}
-html,body{height:100%;overscroll-behavior:none}
-body{font-family:var(--font-body);background:var(--deep);color:var(--t);overflow:hidden}
+    /* Reset */
+    *{box-sizing:border-box;margin:0;padding:0}
+    html,body{height:100%; overscroll-behavior:none;}
+    body{font-family:var(--font-body);background:var(--bg-deep);color:var(--text);overflow:hidden}
 
-#app{
-  display:grid;
-  grid-template-columns:var(--W) 1fr;
-  grid-template-rows:var(--H) 1fr;
-  grid-template-areas:"h h" "s m";
-  height:100vh;
-}
+    /* Hide any webkit scrollbars globally (backup) */
+    *::-webkit-scrollbar{width:0;height:0}
 
-header{
-  grid-area:h;
-  display:flex;
-  align-items:center;
-  gap:10px;
-  padding:0 14px;
-  background:var(--mid);
-  border-bottom:1px solid var(--b);
-}
+    /* Title styling: more solid + glow */
+    .title{
+      position:relative;
+      font-family:var(--font-title);
+      font-size:clamp(1.6rem, 2.4vw + 1rem, 2.8rem);
+      line-height:1;
+      letter-spacing:.5px;
+      color:#dcd0ff; /* solid fallback */
+      background:linear-gradient(90deg, var(--neon-purple), var(--neon-pink));
+      -webkit-background-clip: text; background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter:drop-shadow(0 0 6px rgba(141,58,255,.6)) drop-shadow(0 0 14px rgba(255,56,199,.35));
+    }
+    .title::after{
+      content:attr(data-text);
+      position:absolute; inset:0;
+      -webkit-text-fill-color:transparent;
+      text-shadow:0 0 1px rgba(255,255,255,.35), 0 0 2px rgba(141,58,255,.45);
+      pointer-events:none;
+    }
 
-#btnMenu{
-  display:none;
-  width:36px;height:36px;
-  border-radius:8px;border:1px solid var(--b);
-  background:#131313;color:white;
-  cursor:pointer;
-}
+    /* Layout */
+    #app{
+      display:grid;
+      grid-template-columns:var(--sidebar-w) 1fr;
+      grid-template-rows:var(--header-h) 1fr;
+      grid-template-areas:
+        "header header"
+        "sidebar main";
+      height:100vh;
+    }
 
-.title{
-  font-family:var(--font-title);
-  font-size:clamp(1.6rem,2.4vw+1rem,2.8rem);
-  color:#dcd0ff;
-  background:linear-gradient(90deg,var(--p),var(--k));
-  -webkit-background-clip:text;
-  -webkit-text-fill-color:transparent;
-  filter:drop-shadow(0 0 6px rgba(141,58,255,.6)) drop-shadow(0 0 14px rgba(255,56,199,.35));
-}
+    header{
+      grid-area:header;
+      display:flex; align-items:center; gap:14px;
+      padding:0 16px;
+      background:var(--bg-mid);
+      border-bottom:1px solid var(--border);
+    }
+    .hamburger{
+      display:none; width:38px; height:38px; border-radius:8px;
+      border:1px solid var(--border);
+      background:#131313; color:#fff; cursor:pointer;
+    }
 
-aside{
-  grid-area:s;
-  padding:16px;
-  background:var(--mid);
-  border-right:1px solid var(--b);
-}
+    aside{
+      grid-area:sidebar;
+      padding:18px;
+      background:var(--bg-mid);
+      border-right:1px solid var(--border);
+    }
+    aside h2{
+      font-family:var(--font-title); font-size:1.6rem; text-align:center;
+      color:var(--neon-purple); text-shadow:0 0 10px var(--neon-purple); margin-bottom:10px;
+    }
+    .nav{ list-style:none; display:flex; flex-direction:column; gap:10px; }
+    .nav a{
+      display:block; padding:10px 14px; background:#131313;
+      border:1px solid var(--border); border-radius:10px; color:var(--text-dim);
+      text-decoration:none; transition:.25s; cursor:pointer;
+    }
+    .nav a:hover, .nav a.active{ color:#fff; background:var(--neon-dark); box-shadow:0 0 14px var(--neon-purple); }
 
-aside h2{
-  font-family:var(--font-title);
-  font-size:1.6rem;
-  text-align:center;
-  color:var(--p);
-  text-shadow:0 0 10px var(--p);
-  margin-bottom:10px;
-}
+    main{
+      grid-area:main; position:relative;
+      padding:16px; height:calc(100vh - var(--header-h)); overflow:hidden;
+      background:
+        radial-gradient(1200px 800px at 20% -20%, rgba(141,58,255,.12), transparent 60%),
+        radial-gradient(1200px 800px at 120% 20%, rgba(255,56,199,.12), transparent 60%);
+    }
 
-.nav{list-style:none;display:flex;flex-direction:column;gap:10px;}
-.nav a{
-  display:block;
-  padding:10px;
-  background:#131313;
-  border:1px solid var(--b);
-  border-radius:10px;
-  color:var(--td);
-  text-decoration:none;
-  cursor:pointer;
-  transition:.25s;
-}
-.nav a:hover,.nav a.active{
-  color:white;
-  background:var(--d);
-  box-shadow:0 0 14px var(--p);
-}
+    .card{
+      background:var(--bg-card); border:1px solid var(--border);
+      border-radius:14px; padding:16px;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,0.02), 0 0 24px rgba(141,58,255,.08);
+    }
 
-main{
-  grid-area:m;
-  position:relative;
-  padding:16px;
-  height:calc(100vh - var(--H));
-  overflow:hidden;
-  background:
-    radial-gradient(1200px 800px at 20% -20%,rgba(141,58,255,.12),transparent 60%),
-    radial-gradient(1200px 800px at 120% 20%,rgba(255,56,199,.12),transparent 60%);
-}
+    /* Calendar fixed area */
+    #calendarWrap{ height:100%; display:flex; flex-direction:column; }
+    #calendar{ flex:1; min-height:0; }
 
-.card{
-  height:100%;
-  background:var(--card);
-  border:1px solid var(--b);
-  border-radius:14px;
-  padding:16px;
-  box-shadow:inset 0 0 0 1px rgba(255,255,255,.02),0 0 24px rgba(141,58,255,.08);
-}
+    /* FullCalendar theme */
+    .fc{ --fc-border-color: var(--border); }
+    .fc .fc-toolbar-title{ font-family:var(--font-title); color:#fff; text-shadow:0 0 12px var(--neon-purple); }
+    .fc .fc-button{ background:var(--neon-dark)!important; border:none!important; color:#fff!important; transition:.25s; }
+    .fc .fc-button:hover{ background:var(--neon-purple)!important; box-shadow:0 0 12px var(--neon-purple); }
+    .fc .fc-daygrid-day-number{ color:var(--text); }
+    .fc .fc-col-header-cell-cushion{ color:var(--text-dim); }
+    .fc-theme-standard td, .fc-theme-standard th{ border-color:var(--border); }
+    .fc-day-today{ background:#1a1220!important; }
 
-.view{display:none;height:100%}
-.view.active{display:block;animation:fade .25s ease}
+    .fc-day-with-stream{ background:#2a0047!important; transition:.25s; }
+    .fc-day-with-stream:hover{ background:#43007a!important; box-shadow:inset 0 0 12px var(--neon-purple); }
 
-#calendarWrap{height:100%;display:flex;flex-direction:column}
-#calendar{flex:1;min-height:0}
+    /* Buttons, inputs */
+    .btn{ background:var(--neon-dark); border:1px solid var(--neon-purple); color:#fff; padding:8px 12px; border-radius:10px; cursor:pointer; transition:.25s; }
+    .btn:hover{ background:var(--neon-purple); box-shadow:0 0 12px var(--neon-purple); }
+    .input, .select{ background:#131313; border:1px solid var(--border); color:#fff; padding:8px 12px; border-radius:10px; outline:none; }
+    .input:focus, .select:focus{ border-color:var(--neon-purple); box-shadow:0 0 10px var(--neon-purple); }
 
-/* FC */
-.fc{--fc-border-color:var(--b)}
-.fc .fc-toolbar-title{
-  font-family:var(--font-title);
-  color:#fff;
-  text-shadow:0 0 12px var(--p);
-}
-.fc .fc-button{
-  background:var(--d)!important;
-  border:none!important;
-  color:#fff!important;
-  transition:.25s;
-}
-.fc .fc-button:hover{background:var(--p)!important;box-shadow:0 0 12px var(--p)}
-.fc .fc-daygrid-day-number{color:var(--t)}
-.fc .fc-col-header-cell-cushion{color:var(--td)}
-.fc-theme-standard td,.fc-theme-standard th{border-color:var(--b)}
-.fc-day-today{background:#1a1220!important}
+    /* Views */
+    .view{ display:none; height:100%; }
+    .view.active{ display:block; animation:fade .35s ease; }
 
-.fc-day-with-stream{
-  background:#2a0047!important;
-  transition:.25s;
-}
-.fc-day-with-stream:hover{
-  background:#43007a!important;
-  box-shadow:inset 0 0 12px var(--p);
-}
+    /* Top Asistencias */
+    .controls{ display:flex; flex-wrap:wrap; gap:10px; align-items:center; margin:8px 0 12px; }
+    .list{ list-style:none; display:grid; grid-template-columns: 1fr auto; row-gap:8px; column-gap:12px; padding:0; max-height:calc(100% - 140px); overflow:auto; }
+    .list li{ padding:10px 0; border-bottom:1px dashed var(--border); }
+    .badge{ font-weight:700; }
+    .count{ color:var(--neon-pink); }
+    .pager{ display:flex; align-items:center; gap:10px; justify-content:flex-end; margin-top:10px; }
 
-/* top */
-.controls{display:flex;flex-wrap:wrap;gap:8px;margin:6px 0 10px}
-.list{
-  list-style:none;
-  display:grid;
-  grid-template-columns:1fr auto;
-  row-gap:8px;
-  column-gap:12px;
-  padding:0;
-  max-height:calc(100% - 140px);
-  overflow:auto;
-}
-.list li{padding:8px 0;border-bottom:1px dashed var(--b)}
-.badge{font-weight:700}
-.count{color:var(--k)}
+    /* Modal */
+    .modal{ position:fixed; inset:0; display:none; place-items:center; background:rgba(0,0,0,.55); backdrop-filter: blur(3px); z-index:50; }
+    .modal.open{ display:grid; animation:fade .2s ease; }
+    .modal .box{ width:min(720px, 92vw); max-height:80vh; overflow:auto; background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:0 0 24px rgba(141,58,255,.25); }
 
-.pager{display:flex;justify-content:flex-end;gap:10px;margin-top:8px}
-.input,.select{
-  background:#131313;
-  border:1px solid var(--b);
-  color:white;
-  padding:8px 12px;
-  border-radius:10px;
-  outline:none;
-}
-.btn{
-  background:var(--d);
-  border:1px solid var(--p);
-  color:white;
-  padding:8px 12px;
-  border-radius:10px;
-  cursor:pointer;
-  transition:.25s;
-}
-.btn:hover{
-  background:var(--p);
-  box-shadow:0 0 12px var(--p);
-}
+    /* Toast */
+    .toast{ position:fixed; right:16px; bottom:16px; background:#141414; border:1px solid var(--border); color:#fff; padding:10px 14px; border-radius:10px; box-shadow:0 0 14px rgba(141,58,255,.25); opacity:0; transform:translateY(10px); transition:.25s; z-index:60; }
+    .toast.show{ opacity:1; transform:none; }
 
-/* modal */
-.modal{
-  position:fixed;inset:0;
-  display:none;place-items:center;
-  background:rgba(0,0,0,.5);
-  backdrop-filter:blur(3px);
-  z-index:100;
-}
-.modal.open{display:grid;animation:fade .25s ease}
-.box{
-  width:min(700px,90vw);
-  max-height:80vh;
-  overflow:auto;
-  background:var(--card);
-  border-radius:14px;
-  padding:16px;
-  border:1px solid var(--b);
-  box-shadow:0 0 24px rgba(141,58,255,.25);
-}
+    /* Animations */
+    @keyframes fade{ from{opacity:0} to{opacity:1} }
 
-/* toast */
-.toast{
-  position:fixed;
-  right:14px;bottom:14px;
-  background:#141414;
-  border:1px solid var(--b);
-  color:white;
-  padding:10px 14px;
-  border-radius:10px;
-  box-shadow:0 0 14px rgba(141,58,255,.25);
-  opacity:0;
-  transform:translateY(10px);
-  transition:.25s;
-  z-index:110;
-}
-.toast.show{opacity:1;transform:none}
-
-@keyframes fade{from{opacity:0}to{opacity:1}}
-
-@media(max-width:900px){
-  :root{--W:0}
-  #app{
-    grid-template-columns:1fr;
-    grid-template-areas:"h" "m";
-  }
-  aside{
-    position:fixed;
-    top:var(--H);
-    left:0;bottom:0;
-    width:250px;
-    background:var(--mid);
-    transform:translateX(-100%);
-    transition:.25s;
-    z-index:50;
-  }
-  aside.open{transform:none}
-  #btnMenu{display:block}
-}
-</style>
+    /* Mobile */
+    @media (max-width: 920px){
+      :root{ --sidebar-w: 0px; }
+      #app{ grid-template-columns: 1fr; grid-template-areas: "header" "main"; }
+      aside{ position:fixed; top:var(--header-h); left:0; bottom:0; width:280px; transform:translateX(-100%); transition:.25s; z-index:40; }
+      aside.open{ transform:none; box-shadow:12px 0 24px rgba(0,0,0,.4); }
+      .hamburger{ display:inline-grid; place-items:center; }
+    }
+  </style>
 </head>
-
 <body>
 
-<audio id="sfx" src="https://cdn.freesound.org/previews/656/656770_1648170-lq.mp3"></audio>
+  <!-- SFX (suave) -->
+  <audio id="sfx" src="https://cdn.freesound.org/previews/656/656770_1648170-lq.mp3"></audio>
 
-<div id="app">
+  <div id="app">
+    <header>
+      <button class="hamburger" id="btnMenu">☰</button>
+      <h1 class="title" id="pageTitle" data-text="Calendario de Asistencia Abdara12">Calendario de Asistencia Abdara12</h1>
+    </header>
 
-<header>
-  <button id="btnMenu">☰</button>
-  <h1 class="title">Asistencia Abdara12</h1>
-</header>
+    <aside id="sidebar">
+      <h2>Menú</h2>
+      <ul class="nav">
+        <li><a id="nav-cal" class="active">Calendario</a></li>
+        <li><a id="nav-top">Top Asistencias</a></li>
+      </ul>
+    </aside>
 
-<aside id="sidebar">
-  <h2>Menú</h2>
-  <ul class="nav">
-    <li><a id="nav-cal" class="active">Calendario</a></li>
-    <li><a id="nav-top">Top Asistencias</a></li>
-  </ul>
-</aside>
+    <main>
+      <!-- CALENDAR VIEW (fijo, sin scroll fantasma) -->
+      <section id="view-cal" class="view active">
+        <div id="calendarWrap" class="card" style="height:100%">
+          <div id="calendar" aria-label="Calendario"></div>
+        </div>
+      </section>
 
-<main>
+      <!-- TOP ASISTENCIAS (completo + filtros + orden + paginación + búsqueda) -->
+      <section id="view-top" class="view">
+        <div class="card" style="height:100%">
+          <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px;">
+            <h2 class="title" data-text="Top Asistencias">Top Asistencias</h2>
+            <div style="display:flex; gap:8px;">
+              <button class="btn" id="btn-back">&larr; Volver</button>
+            </div>
+          </div>
 
-<section id="view-cal" class="view active">
-  <div id="calendarWrap" class="card">
-    <div id="calendar"></div>
+          <!-- Controles -->
+          <div class="controls">
+            <input id="search" class="input" placeholder="Buscar usuario (/ para enfocar)" />
+            <select id="type" class="select">
+              <option value="all">Todos los tipos</option>
+              <option value="normal">Solo Normal</option>
+              <option value="tarde">Solo Tarde</option>
+              <option value="extra">Solo Extra</option>
+            </select>
+            <select id="sort" class="select">
+              <option value="DESC">Mayor → Menor</option>
+              <option value="ASC">Menor → Mayor</option>
+              <option value="AZ">Nombre A → Z</option>
+              <option value="ZA">Nombre Z → A</option>
+            </select>
+            <select id="pageSize" class="select">
+              <option value="10">10 por página</option>
+              <option value="15" selected>15 por página</option>
+              <option value="25">25 por página</option>
+              <option value="50">50 por página</option>
+            </select>
+            <button id="btnReset" class="btn">Reiniciar</button>
+          </div>
+
+          <!-- Listado -->
+          <ul id="list" class="list" aria-live="polite"></ul>
+
+          <!-- Paginación -->
+          <div class="pager">
+            <span id="pageInfo" style="color:var(--text-dim)"></span>
+            <button class="btn" id="prev">Anterior</button>
+            <button class="btn" id="next">Siguiente</button>
+          </div>
+        </div>
+      </section>
+    </main>
   </div>
-</section>
 
-<section id="view-top" class="view">
-  <div class="card">
-    <h2 class="title" style="font-size:2rem">Top Asistencias</h2>
-
-    <div class="controls">
-      <input id="search" class="input" placeholder="Buscar"/>
-      <select id="type" class="select">
-        <option value="all">Todos</option>
-        <option value="normal">Normal</option>
-        <option value="tarde">Tarde</option>
-        <option value="extra">Extra</option>
-      </select>
-      <select id="sort" class="select">
-        <option value="DESC">Mayor→Menor</option>
-        <option value="ASC">Menor→Mayor</option>
-        <option value="AZ">A→Z</option>
-        <option value="ZA">Z→A</option>
-      </select>
-      <select id="pageSize" class="select">
-        <option>10</option>
-        <option selected>15</option>
-        <option>25</option>
-        <option>50</option>
-      </select>
-      <button id="btnReset" class="btn">Reset</button>
+  <!-- Modal Detalles Día -->
+  <div class="modal" id="modal">
+    <div class="box">
+      <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px;">
+        <h3 class="title" id="modalTitle" data-text="Detalles">Detalles</h3>
+        <button class="btn" id="modalClose">Cerrar</button>
+      </div>
+      <div id="modalBody"></div>
     </div>
-
-    <ul id="list" class="list"></ul>
-
-    <div class="pager">
-      <span id="pageInfo"></span>
-      <button class="btn" id="prev">←</button>
-      <button class="btn" id="next">→</button>
-    </div>
-
   </div>
-</section>
 
-</main>
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
 
-</div>
+  <script>
+    /* ===================== CONFIG ===================== */
+    const API_URL = "https://script.google.com/macros/s/AKfycbx6WjqODhuetXMwsAtzfvXY539Quj1exnRz7s7J6FQBH2UAlag6Brs6InxPsRS3uq2F/exec?webAction=get_all_data";
+    const ZONE = "America/Guatemala";
 
-<div class="modal" id="modal">
-  <div class="box">
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-      <h3 id="modalTitle" class="title">Detalles</h3>
-      <button class="btn" id="modalClose">X</button>
-    </div>
-    <div id="modalBody"></div>
-  </div>
-</div>
+    let STREAMS = {};
+    let ASIST = [];
 
-<div class="toast" id="toast"></div>
+    const memoCounts = new Map(); // type -> Map(user=>count)
 
-<script>
-const API = "https://script.google.com/macros/s/AKfycbx6WjqODhuetXMwsAtzfvXY539Quj1exnRz7s7J6FQBH2UAlag6Brs6InxPsRS3uq2F/exec?webAction=get_all_data";
-const TZ="America/Guatemala";
+    const state = {
+      query: "",
+      type: "all",
+      sort: "DESC",
+      page: 1,
+      pageSize: 15,
+      rows: []
+    };
 
-let STREAMS={};
-let ASIST=[];
+    /* ===================== HELPERS ===================== */
+    const $ = sel => document.querySelector(sel);
+    const $$ = sel => document.querySelectorAll(sel);
 
-const $=x=>document.querySelector(x);
-
-function toast(t){const e=$("#toast");e.textContent=t;e.classList.add("show");setTimeout(()=>e.classList.remove("show"),1200)}
-function sfx(){const a=$("#sfx");try{a.volume=.3;a.currentTime=0;a.play()}catch(e){}}
-
-async function load(){
-  const r=await fetch(API+"&_="+Date.now());
-  const j=await r.json();
-
-  STREAMS=j.streams||{};
-
-  ASIST=(j.asistencia||[]).filter(x=>{
-    const f=x[0],u=x[1],t=x[2];
-    if(!u||!u.trim())return false;
-    if(!["normal","tarde","extra"].includes(t))return false;
-    if(!f||isNaN(Date.parse(f)))return false;
-    return true;
-  });
-}
-
-let cal=null;
-function calendarInit(){
-  if(cal){try{cal.destroy()}catch(e){} cal=null}
-  cal=new FullCalendar.Calendar($("#calendar"),{
-    initialView:"dayGridMonth",
-    timeZone:TZ,locale:"es",
-    headerToolbar:{left:"prev,next today",center:"title"},
-    dayCellDidMount(i){
-      const d=i.date.toISOString().split("T")[0];
-      if(STREAMS[d]) i.el.classList.add("fc-day-with-stream");
-    },
-    dateClick(i){
-      const d=i.dateStr;
-      if(!STREAMS[d])return;
-      const list=ASIST.filter(a=>new Date(a[0]).toLocaleDateString("en-CA",{timeZone:TZ})===d);
-      let html="";
-      if(!list.length)html="<p>Sin registros.</p>";
-      else{
-        html="<ul style='list-style:none;padding:0;margin:0'>";
-        for(const a of list){
-          html+=`<li style="padding:6px 0;border-bottom:1px dashed #444"><b>${a[1]}</b> <span style="color:var(--k)">(${a[2]})</span></li>`;
-        }
-        html+="</ul>";
-      }
-      modal("Asistencias — "+d,html);
-      sfx();
+    function debounce(fn, ms){
+      let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), ms); };
     }
-  });
-  cal.render();
-}
+    function playSFX(){ const s=$('#sfx'); try{ s.volume=0.35; s.currentTime=0; s.play(); }catch(e){} }
+    function showToast(msg){ const el=$('#toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), 1400); }
+    function openModal(title, html){ $('#modalTitle').textContent=title; $('#modalBody').innerHTML=html; $('#modal').classList.add('open'); }
+    function closeModal(){ $('#modal').classList.remove('open'); }
+    function toggleSidebar(force){ const sb=$('#sidebar'); if(force===true){sb.classList.add('open');} else if(force===false){sb.classList.remove('open');} else {sb.classList.toggle('open');} }
 
-/* MODAL */
-function modal(t,h){$("#modalTitle").textContent=t;$("#modalBody").innerHTML=h;$("#modal").classList.add("open")}
-$("#modalClose").onclick=()=>$("#modal").classList.remove("open");
-$("#modal").onclick=e=>{if(e.target.id==="modal")$("#modal").classList.remove("open")}
+    /* ===================== NAV ===================== */
+    const viewCal = $('#view-cal');
+    const viewTop = $('#view-top');
 
-/* TOP */
-const list=$("#list");
-const search=$("#search");
-const type=$("#type");
-const sort=$("#sort");
-const pageSize=$("#pageSize");
-const pageInfo=$("#pageInfo");
-const prev=$("#prev");
-const next=$("#next");
-const btnReset=$("#btnReset");
+    $('#btnMenu').addEventListener('click', ()=>toggleSidebar());
+    $('#nav-cal').addEventListener('click', ()=>{ show('cal'); $('#nav-cal').classList.add('active'); $('#nav-top').classList.remove('active'); toggleSidebar(false); });
+    $('#nav-top').addEventListener('click', ()=>{ buildTop(); show('top'); playSFX(); $('#nav-top').classList.add('active'); $('#nav-cal').classList.remove('active'); toggleSidebar(false); });
+    $('#btn-back').addEventListener('click', ()=>{ show('cal'); });
 
-let rows=[];
-const S={q:"",t:"all",o:"DESC",p:1,ps:15};
+    function show(view){
+      viewCal.classList.remove('active'); viewTop.classList.remove('active');
+      if(view==='cal') viewCal.classList.add('active');
+      if(view==='top') viewTop.classList.add('active');
+    }
 
-function build(){
-  const map=new Map();
-  for(const r of ASIST){
-    const u=r[1],tp=r[2];
-    if(S.t==="all"||S.t===tp)map.set(u,(map.get(u)||0)+1);
-  }
-  rows=Array.from(map.entries()).map(([u,c])=>({u,c}));
-  paint();
-}
+    /* ===================== LOAD DATA ===================== */
+    async function loadData(){
+      const res = await fetch(API_URL + "&_=" + Date.now());
+      const json = await res.json();
 
-function paint(){
-  let r=[...rows];
+      STREAMS = json.streams || {};
 
-  if(S.q)r=r.filter(x=>x.u.toLowerCase().includes(S.q));
+      // Anti-fantasma: filtra filas inválidas
+      ASIST = (json.asistencia || []).filter(row=>{
+        const fecha = row[0]; const user = row[1]; const tipo = row[2];
+        if(!user || !String(user).trim()) return false;
+        if(!['normal','tarde','extra'].includes(tipo)) return false;
+        if(!fecha || isNaN(Date.parse(fecha))) return false;
+        return true;
+      });
+    }
 
-  if(S.o==="DESC")r.sort((a,b)=>b.c-a.c);
-  if(S.o==="ASC")r.sort((a,b)=>a.c-b.c);
-  if(S.o==="AZ")r.sort((a,b)=>a.u.localeCompare(b.u));
-  if(S.o==="ZA")r.sort((a,b)=>b.u.localeCompare(a.u));
+    document.addEventListener('DOMContentLoaded', async ()=>{
+      await loadData();
+      initCalendar();
+      precomputeCounts();
 
-  const tot=r.length,mp=Math.max(1,Math.ceil(tot/S.ps));
-  if(S.p>mp)S.p=mp;
-  const st=(S.p-1)*S.ps,en=st+S.ps;
-  const page=r.slice(st,en);
+      // shortcuts
+      document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); if(e.key==='/'){ e.preventDefault(); $('#search').focus(); } });
 
-  list.innerHTML="";
-  const frag=document.createDocumentFragment();
-  for(const x of page){
-    let a=document.createElement("li");
-    a.innerHTML=`<span class="badge">${x.u}</span>`;
-    let b=document.createElement("li");
-    b.innerHTML=`<span class="count">${x.c}</span>`;
-    frag.appendChild(a);frag.appendChild(b);
-  }
-  list.appendChild(frag);
+      // auto-refresh cada 30s
+      setInterval(async ()=>{
+        await loadData();
+        // Recolor días del calendario rápidamente
+        recolorCalendarDays();
+        // Recalcula top si estás en la vista
+        if(viewTop.classList.contains('active')){
+          precomputeCounts();
+          buildTop();
+        }
+      }, 30000);
+    });
 
-  pageInfo.textContent=`${S.p}/${mp} — ${tot}`;
-  list.scrollTo({top:0,behavior:"smooth"});
-}
+    /* ===================== CALENDAR ===================== */
+    let calendar;
+    function initCalendar(){
+      const el = $('#calendar');
+      if(calendar){ try{ calendar.destroy(); }catch(e){} }
+      calendar = new FullCalendar.Calendar(el,{
+        height: '100%',
+        expandRows: true,
+        initialView:'dayGridMonth',
+        locale:'es',
+        timeZone: ZONE,
+        headerToolbar:{ left:'prev,next today', center:'title', right:'dayGridMonth,timeGridWeek' },
+        dayCellDidMount(arg){
+          const iso = arg.date.toISOString().split('T')[0];
+          if(STREAMS[iso]) arg.el.classList.add('fc-day-with-stream');
+        },
+        dateClick(info){
+          const f = info.dateStr;
+          if(!STREAMS[f]) return;
+          const list = ASIST.filter(a=> new Date(a[0]).toLocaleDateString('en-CA',{timeZone:ZONE}) === f);
+          const html = list.length
+            ? `<ul style="list-style:none; padding:0; margin:0">
+                 ${list.map(a=>`<li style="padding:8px 0; border-bottom:1px dashed var(--border)"><b>${a[1]}</b> <span style="color:var(--neon-pink)">(${a[2]})</span></li>`).join('')}
+               </ul>`
+            : '<p>Sin registros.</p>';
+          openModal(`Asistencias — ${f}`, html);
+          playSFX();
+        }
+      });
+      calendar.render();
+    }
 
-/* listeners */
-search.oninput=()=>{S.q=search.value.toLowerCase();S.p=1;paint()}
-type.onchange=()=>{S.t=type.value;S.p=1;build()}
-sort.onchange=()=>{S.o=sort.value;S.p=1;paint()}
-pageSize.onchange=()=>{S.ps=parseInt(pageSize.value);S.p=1;paint()}
-prev.onclick=()=>{if(S.p>1){S.p--;paint()}}
-next.onclick=()=>{S.p++;paint()}
-btnReset.onclick=()=>{
-  search.value="";S.q="";
-  type.value="all";S.t="all";
-  sort.value="DESC";S.o="DESC";
-  pageSize.value="15";S.ps=15;
-  S.p=1;build();toast("Reset")
-}
+    function recolorCalendarDays(){
+      // quita marcas previas
+      $$('.fc-daygrid-day').forEach(d=>d.classList.remove('fc-day-with-stream'));
+      // aplica marcas según STREAMS actual
+      $$('.fc-daygrid-day').forEach(cell=>{
+        const dataDate = cell.getAttribute('data-date'); // FullCalendar setea data-date
+        if(dataDate && STREAMS[dataDate]) cell.classList.add('fc-day-with-stream');
+      });
+    }
 
-/* nav */
-$("#nav-cal").onclick=()=>page("cal")
-$("#nav-top").onclick=()=>{page("top");sfx()}
-function page(n){
-  $("#nav-cal").classList.remove("active");
-  $("#nav-top").classList.remove("active");
-  $("#view-cal").classList.remove("active");
-  $("#view-top").classList.remove("active");
-  if(n==="cal"){$("#nav-cal").classList.add("active");$("#view-cal").classList.add("active")}
-  else{$("#nav-top").classList.add("active");$("#view-top").classList.add("active");build()}
-  $("#sidebar").classList.remove("open");
-}
+    // Modal close events
+    $('#modalClose').addEventListener('click', closeModal);
+    $('#modal').addEventListener('click', (e)=>{ if(e.target.id==='modal') closeModal(); });
 
-/* mobile */
-$("#btnMenu").onclick=()=>$("#sidebar").classList.toggle("open")
+    /* ===================== TOP ASISTENCIAS ===================== */
+    const $search = $('#search');
+    const $type = $('#type');
+    const $sort = $('#sort');
+    const $pageSize = $('#pageSize');
+    const $list = $('#list');
+    const $pageInfo = $('#pageInfo');
+    const $prev = $('#prev');
+    const $next = $('#next');
+    const $btnReset = $('#btnReset');
 
-/* INIT */
-(async()=>{
-  await load();
-  calendarInit();
-  setInterval(load,30000);
-})();
-</script>
+    $search.addEventListener('input', debounce(()=>{
+      state.query = ($search.value||'').trim().toLowerCase();
+      state.page=1; renderTop();
+    }, 140));
+    $type.addEventListener('change', ()=>{ state.type = $type.value; state.page=1; buildTop(); showToast('Filtro aplicado'); });
+    $sort.addEventListener('change', ()=>{ state.sort = $sort.value; state.page=1; renderTop(); });
+    $pageSize.addEventListener('change', ()=>{ state.pageSize = parseInt($pageSize.value,10); state.page=1; renderTop(); });
+    $prev.addEventListener('click', ()=>{ if(state.page>1){ state.page--; renderTop(); } });
+    $next.addEventListener('click', ()=>{ const max = Math.ceil(state.rows.length/state.pageSize)||1; if(state.page<max){ state.page++; renderTop(); } });
+    $btnReset.addEventListener('click', ()=>{
+      $search.value=''; state.query=''; $type.value='all'; state.type='all'; $sort.value='DESC'; state.sort='DESC';
+      state.page=1; state.pageSize=parseInt($pageSize.value,10);
+      buildTop(); showToast('Filtros reiniciados');
+    });
+
+    function precomputeCounts(){
+      memoCounts.clear();
+      const types = ['all','normal','tarde','extra'];
+      for(const t of types){ memoCounts.set(t, new Map()); }
+      for(const r of ASIST){
+        const user=r[1], tipo=r[2];
+        memoCounts.get('all').set(user,(memoCounts.get('all').get(user)||0)+1);
+        if(memoCounts.has(tipo)) memoCounts.get(tipo).set(user,(memoCounts.get(tipo).get(user)||0)+1);
+      }
+    }
+
+    function buildTop(){
+      const m = memoCounts.get(state.type)||new Map();
+      state.rows = Array.from(m.entries()).map(([user,count])=>({user, count}));
+      renderTop();
+    }
+
+    function renderTop(){
+      let rows = state.rows.slice();
+
+      if(state.query){ rows = rows.filter(r => r.user.toLowerCase().includes(state.query)); }
+
+      if(state.sort === 'DESC') rows.sort((a,b)=> b.count - a.count);
+      if(state.sort === 'ASC') rows.sort((a,b)=> a.count - b.count);
+      if(state.sort === 'AZ') rows.sort((a,b)=> a.user.localeCompare(b.user));
+      if(state.sort === 'ZA') rows.sort((a,b)=> b.user.localeCompare(a.user));
+
+      const total = rows.length;
+      const maxPage = Math.max(1, Math.ceil(total / state.pageSize));
+      if(state.page > maxPage) state.page = maxPage;
+      const start = (state.page-1)*state.pageSize;
+      const end = start + state.pageSize;
+      const pageRows = rows.slice(start,end);
+
+      $list.innerHTML = '';
+      const frag = document.createDocumentFragment();
+      for(const r of pageRows){
+        const liName=document.createElement('li'); liName.innerHTML=`<span class="badge">${r.user}</span>`;
+        const liCount=document.createElement('li'); liCount.innerHTML=`<span class="count">${r.count}</span>`;
+        frag.appendChild(liName); frag.appendChild(liCount);
+      }
+      $list.appendChild(frag);
+
+      $pageInfo.textContent = `Página ${state.page} / ${maxPage} — ${total} usuarios`;
+      $list.scrollTo({top:0, behavior:'smooth'});
+    }
+  </script>
 </body>
 </html>
