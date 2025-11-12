@@ -11,7 +11,7 @@
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js'></script>
 
     <style>
-        /* --- 1. Tema Oscuro (¡CON EL ARREGLO!) --- */
+        /* --- 1. Tema Oscuro --- */
         body, html {
             margin: 0;
             padding: 0;
@@ -19,10 +19,10 @@
             background-color: #121212;
             color: #e0e0e0;
             height: 100%;
-            overflow: hidden; /* <-- ¡AQUÍ ESTÁ LA MAGIA! Esto mata el scrollbar principal */
+            overflow: hidden; /* Matar el scroll principal */
         }
 
-        /* --- Layout principal (Sin cambios) --- */
+        /* --- Layout principal (¡CON EL ARREGLO!) --- */
         #app-container {
             display: grid;
             grid-template-columns: 240px 1fr;
@@ -30,10 +30,10 @@
             grid-template-areas:
                 "header header"
                 "sidebar main";
-            height: 100vh; /* Ocupar toda la altura (que ya no se desborda) */
+            height: 100%; /* <-- CAMBIADO DE 100vh a 100% */
         }
 
-        /* --- 2. Header (Sin cambios) --- */
+        /* --- 2. Header --- */
         #app-header {
             grid-area: header;
             background-color: #1f1f1f;
@@ -62,7 +62,7 @@
             margin-right: 15px;
         }
 
-        /* --- 3. Sidebar (Sin cambios) --- */
+        /* --- 3. Sidebar --- */
         #app-sidebar {
             grid-area: sidebar;
             background-color: #1f1f1f;
@@ -95,15 +95,11 @@
             color: white;
         }
 
-        /* --- 4. Contenido Principal (¡Aquí está la clave!) --- */
+        /* --- 4. Contenido Principal --- */
         #app-content {
             grid-area: main;
             padding: 30px;
-            /* * Esta es la línea importante.
-             * Si el contenido (la lista de detalles) es muy largo,
-             * ESTE contenedor tendrá scroll, no la página.
-             */
-            overflow-y: auto; 
+            overflow-y: auto; /* Este es el scroll que SÍ queremos */
         }
         
         .vista-contenido {
@@ -113,7 +109,7 @@
             border: 1px solid #333;
         }
 
-        /* --- 5. Estilos de Calendario y Detalles (Sin cambios) --- */
+        /* --- 5. Estilos de Calendario y Detalles --- */
         .fc .fc-toolbar-title { color: white; }
         .fc .fc-daygrid-day-number { color: #e0e0e0; }
         .fc .fc-col-header-cell-cushion { color: white; }
@@ -138,7 +134,7 @@
             font-size: 1em; margin-bottom: 20px;
         }
         #btn-volver:hover { background: #5a6268; }
-        #detalles-lista { list-style-type: none; padding: 0; }
+        #detalles-lista { list-style: none; padding: 0; }
         #detalles-lista li {
             padding: 10px;
             border-bottom: 1px solid #333;
@@ -234,7 +230,7 @@
             }
         }
 
-        // --- FUNCIÓN DEL CALENDARIO (¡ACTUALIZADA!) ---
+        // --- FUNCIÓN DEL CALENDARIO ---
         function renderizarCalendario(streams, asistencias) {
             const calendarioEl = document.getElementById('vista-calendario');
             
