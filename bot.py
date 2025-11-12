@@ -11,11 +11,11 @@ CLIENT_ID = "u4jxn8cgm5ki14grzcmedwc8yh5pr5"
 
 # Info del Canal
 BOT_NAME = "crimul_bot"
-CHANNEL = "crimul_taquita"
+CHANNEL = "abdara12"
 BROADCASTER_ID = "930537744"  # ID numérico del streamer
 
 # URL de Google Apps Script (¡Verifica que sea la tuya!)
-GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwRLrjylJOxArnAjywtX39XPVY1aY49QYoxvJq_INVoEMl9kLssS-EH5PtUYfHAYYlc/exec"
+GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwaVVPEAbUmNuvaToSMkKBvIUzJxVN5POF-imjGDFRXFsmBUig68YBgZFDSrKcSFRE3/exec"
 
 # Tiempo de chequeo de API (en segundos)
 POLL_INTERVAL = 300  # 300 segundos = 5 minutos
@@ -152,3 +152,4 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         print("\nCerrando bot...")
+
