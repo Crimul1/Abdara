@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
   <title>Calendario de Asistencia Abdara12</title>
 
-  <!-- Fonts -->
+  <!-- Fuentes -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
@@ -19,9 +19,9 @@
       --font-body: 'Roboto', sans-serif;
 
       /* Dark Neon */
-      --bg-deep:#080808;   /* body */
-      --bg-mid:#101010;    /* header/sidebar */
-      --bg-card:#151515;   /* cards */
+      --bg-deep:#080808;
+      --bg-mid:#101010;
+      --bg-card:#151515;
       --border:#262626;
 
       --text:#ededed;
@@ -31,36 +31,27 @@
       --neon-pink:#ff38c7;
       --neon-dark:#3a0061;
 
-      --ok:#00ff9d;
-      --warn:#ffe256;
-      --info:#00b7ff;
-
       --header-h:72px;
       --sidebar-w:270px;
     }
 
-    /* Reset */
     *{box-sizing:border-box;margin:0;padding:0}
     html,body{height:100%; overscroll-behavior:none;}
     body{font-family:var(--font-body);background:var(--bg-deep);color:var(--text);overflow:hidden}
-
-    /* Hide any webkit scrollbars globally (backup) */
     *::-webkit-scrollbar{width:0;height:0}
 
-    /* Title styling: more solid + glow */
     .title{
       position:relative;
       font-family:var(--font-title);
       font-size:clamp(1.6rem, 2.4vw + 1rem, 2.8rem);
       line-height:1;
-      letter-spacing:.5px;
-      color:#dcd0ff; /* solid fallback */
+      color:#dcd0ff;
       background:linear-gradient(90deg, var(--neon-purple), var(--neon-pink));
       -webkit-background-clip:text; background-clip:text;
       -webkit-text-fill-color:transparent;
       filter:drop-shadow(0 0 6px rgba(141,58,255,.6)) drop-shadow(0 0 14px rgba(255,56,199,.35));
     }
-    .title::after{ /* subtle outline for readability */
+    .title::after{
       content:attr(data-text);
       position:absolute; inset:0;
       -webkit-text-fill-color:transparent;
@@ -68,28 +59,66 @@
       pointer-events:none;
     }
 
-    /* Layout */
-    #app{ display:grid; grid-template-columns:var(--sidebar-w) 1fr; grid-template-rows:var(--header-h) 1fr; grid-template-areas:"header header" "sidebar main"; height:100vh; }
+    #app{
+      display:grid;
+      grid-template-columns:var(--sidebar-w) 1fr;
+      grid-template-rows:var(--header-h) 1fr;
+      grid-template-areas:
+        "header header"
+        "sidebar main";
+      height:100vh;
+    }
 
-    header{ grid-area:header; display:flex; align-items:center; gap:14px; padding:0 16px; background:var(--bg-mid); border-bottom:1px solid var(--border); }
-    .hamburger{ display:none; width:38px; height:38px; border-radius:8px; border:1px solid var(--border); background:#131313; color:#fff; cursor:pointer; }
+    header{
+      grid-area:header;
+      display:flex; align-items:center; gap:14px;
+      padding:0 16px;
+      background:var(--bg-mid);
+      border-bottom:1px solid var(--border);
+    }
+    .hamburger{
+      display:none; width:38px; height:38px; border-radius:8px;
+      border:1px solid var(--border);
+      background:#131313; color:#fff; cursor:pointer;
+    }
 
-    aside{ grid-area:sidebar; padding:18px; background:var(--bg-mid); border-right:1px solid var(--border); }
-    aside h2{ font-family:var(--font-title); font-size:1.6rem; text-align:center; color:var(--neon-purple); text-shadow:0 0 10px var(--neon-purple); margin-bottom:10px; }
+    aside{
+      grid-area:sidebar;
+      padding:18px;
+      background:var(--bg-mid);
+      border-right:1px solid var(--border);
+    }
+    aside h2{
+      font-family:var(--font-title); font-size:1.6rem; text-align:center;
+      color:var(--neon-purple); text-shadow:0 0 10px var(--neon-purple); margin-bottom:10px;
+    }
     .nav{ list-style:none; display:flex; flex-direction:column; gap:10px; }
-    .nav a{ display:block; padding:10px 14px; background:#131313; border:1px solid var(--border); border-radius:10px; color:var(--text-dim); text-decoration:none; transition:.25s; cursor:pointer; }
+    .nav a{
+      display:block; padding:10px 14px; background:#131313;
+      border:1px solid var(--border); border-radius:10px; color:var(--text-dim);
+      text-decoration:none; transition:.25s; cursor:pointer;
+    }
     .nav a:hover, .nav a.active{ color:#fff; background:var(--neon-dark); box-shadow:0 0 14px var(--neon-purple); }
 
-    main{ grid-area:main; position:relative; padding:16px; height:calc(100vh - var(--header-h)); overflow:hidden; background:radial-gradient(1200px 800px at 20% -20%, rgba(141,58,255,.12), transparent 60%), radial-gradient(1200px 800px at 120% 20%, rgba(255,56,199,.12), transparent 60%); }
+    main{
+      grid-area:main; position:relative;
+      padding:16px; height:calc(100vh - var(--header-h)); overflow:hidden;
+      background:
+        radial-gradient(1200px 800px at 20% -20%, rgba(141,58,255,.12), transparent 60%),
+        radial-gradient(1200px 800px at 120% 20%, rgba(255,56,199,.12), transparent 60%);
+    }
 
-    .card{ background:var(--bg-card); border:1px solid var(--border); border-radius:14px; padding:16px; box-shadow:inset 0 0 0 1px rgba(255,255,255,0.02), 0 0 24px rgba(141,58,255,.08); }
+    .card{
+      background:var(--bg-card); border:1px solid var(--border);
+      border-radius:14px; padding:16px;
+      box-shadow:inset 0 0 0 1px rgba(255,255,255,0.02), 0 0 24px rgba(141,58,255,.08);
+    }
 
-    /* Calendar fixed area */
     #calendarWrap{ height:100%; display:flex; flex-direction:column; }
     #calendar{ flex:1; min-height:0; }
 
     /* FullCalendar theme */
-    .fc{ --fc-border-color:var(--border); }
+    .fc{ --fc-border-color: var(--border); }
     .fc .fc-toolbar-title{ font-family:var(--font-title); color:#fff; text-shadow:0 0 12px var(--neon-purple); }
     .fc .fc-button{ background:var(--neon-dark)!important; border:none!important; color:#fff!important; transition:.25s; }
     .fc .fc-button:hover{ background:var(--neon-purple)!important; box-shadow:0 0 12px var(--neon-purple); }
@@ -101,13 +130,11 @@
     .fc-day-with-stream{ background:#2a0047!important; transition:.25s; }
     .fc-day-with-stream:hover{ background:#43007a!important; box-shadow:inset 0 0 12px var(--neon-purple); }
 
-    /* Buttons, inputs */
     .btn{ background:var(--neon-dark); border:1px solid var(--neon-purple); color:#fff; padding:8px 12px; border-radius:10px; cursor:pointer; transition:.25s; }
     .btn:hover{ background:var(--neon-purple); box-shadow:0 0 12px var(--neon-purple); }
     .input, .select{ background:#131313; border:1px solid var(--border); color:#fff; padding:8px 12px; border-radius:10px; outline:none; }
     .input:focus, .select:focus{ border-color:var(--neon-purple); box-shadow:0 0 10px var(--neon-purple); }
 
-    /* Views */
     .view{ display:none; height:100%; }
     .view.active{ display:block; animation:fade .35s ease; }
 
@@ -124,14 +151,11 @@
     .modal.open{ display:grid; animation:fade .2s ease; }
     .modal .box{ width:min(720px, 92vw); max-height:80vh; overflow:auto; background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:0 0 24px rgba(141,58,255,.25); }
 
-    /* Toast */
     .toast{ position:fixed; right:16px; bottom:16px; background:#141414; border:1px solid var(--border); color:#fff; padding:10px 14px; border-radius:10px; box-shadow:0 0 14px rgba(141,58,255,.25); opacity:0; transform:translateY(10px); transition:.25s; z-index:60; }
     .toast.show{ opacity:1; transform:none; }
 
-    /* Animations */
     @keyframes fade{ from{opacity:0} to{opacity:1} }
 
-    /* Mobile */
     @media (max-width: 920px){
       :root{ --sidebar-w: 0px; }
       #app{ grid-template-columns: 1fr; grid-template-areas: "header" "main"; }
@@ -143,7 +167,7 @@
 </head>
 <body>
 
-  <!-- SFX (suave) -->
+  <!-- SFX -->
   <audio id="sfx" src="https://cdn.freesound.org/previews/656/656770_1648170-lq.mp3"></audio>
 
   <div id="app">
@@ -161,15 +185,15 @@
     </aside>
 
     <main>
-      <!-- CALENDAR VIEW (fijo, sin scroll fantasma) -->
+      <!-- CALENDARIO -->
       <section id="view-cal" class="view active">
         <div id="calendarWrap" class="card" style="height:100%">
           <div id="calendar" aria-label="Calendario"></div>
         </div>
       </section>
 
-      <!-- TOP ASISTENCIAS (completo + filtros + orden + paginación + búsqueda) -->
-      <section id="view-top" class="view">
+      <!-- TOP ASISTENCIAS -->
+      <section id="view-top" class="view" aria-live="polite">
         <div class="card" style="height:100%">
           <div style="display:flex; align-items:center; justify-content:space-between; gap:10px; margin-bottom:8px;">
             <h2 class="title" data-text="Top Asistencias">Top Asistencias</h2>
@@ -178,7 +202,6 @@
             </div>
           </div>
 
-          <!-- Controles -->
           <div class="controls">
             <input id="search" class="input" placeholder="Buscar usuario (/ para enfocar)" />
             <select id="type" class="select">
@@ -202,10 +225,8 @@
             <button id="btnReset" class="btn">Reiniciar</button>
           </div>
 
-          <!-- Listado -->
-          <ul id="list" class="list" aria-live="polite"></ul>
+          <ul id="list" class="list"></ul>
 
-          <!-- Paginación -->
           <div class="pager">
             <span id="pageInfo" style="color:var(--text-dim)"></span>
             <button class="btn" id="prev">Anterior</button>
@@ -216,145 +237,126 @@
     </main>
   </div>
 
-  <!-- Modal Detalles Día -->
+  <!-- Modal -->
   <div class="modal" id="modal">
     <div class="box">
       <div style="display:flex; justify-content:space-between; align-items:center; gap:10px; margin-bottom:8px;">
-        <h3 class="title" id="modalTitle" data-text="Detalles"></h3>
+        <h3 class="title" id="modalTitle" data-text="Detalles">Detalles</h3>
         <button class="btn" id="modalClose">Cerrar</button>
       </div>
       <div id="modalBody"></div>
     </div>
   </div>
 
-  <!-- Toast -->
   <div class="toast" id="toast"></div>
 
   <script>
     /* ===================== CONFIG ===================== */
-    const API_URL = "https://script.google.com/macros/s/AKfycbx6WjqODhuetXMwsAtzfvXY539Quj1exnRz7s7J6FQBH2UAlag6Brs6InxPsRS3uq2F/exec?webAction=get_all_data";
+    const API_URL = "https://script.google.com/macros/s/AKfycbyNkhNnLkxx0bqxV5rGbQGnjv64Ny5ldga2nWzsznPokb5n0NejNM3FC8bdhSzwsjBz/exec?webAction=get_all_data";
     const ZONE = "America/Guatemala";
 
     let STREAMS = {};
     let ASIST = [];
 
-    // Pre-counters memo por tipo
-    const memoCounts = new Map(); // key: type -> Map(user=>count)
+    const memoCounts = new Map(); // type -> Map(user=>count)
 
-    // Estado Top Asistencias
-    const state = {
-      query: "",
-      type: "all",
-      sort: "DESC",
-      page: 1,
-      pageSize: 15,
-      rows: [] // [{user, count}]
-    };
+    const state = { query:"", type:"all", sort:"DESC", page:1, pageSize:15, rows:[] };
 
-    /* ===================== HELPERS / NUEVAS FUNCIONES ===================== */
-    const $ = sel => document.querySelector(sel);
-    const $$ = sel => document.querySelectorAll(sel);
-
-    function debounce(fn, ms){
-      let t; return (...args)=>{ clearTimeout(t); t=setTimeout(()=>fn(...args), ms); };
-    }
-
-    function playSFX(){ const s=$('#sfx'); try{ s.volume=0.35; s.currentTime=0; s.play(); }catch(e){} }
-
-    function showToast(msg){ const el=$('#toast'); el.textContent=msg; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'), 1400); }
-
-    function openModal(title, html){ $('#modalTitle').textContent=title; $('#modalTitle').setAttribute('data-text',title); $('#modalBody').innerHTML=html; $('#modal').classList.add('open'); }
-    function closeModal(){ $('#modal').classList.remove('open'); }
-
-    function toggleSidebar(force){ const sb=$('#sidebar'); if(force===true){sb.classList.add('open');} else if(force===false){sb.classList.remove('open');} else {sb.classList.toggle('open');} }
-
-    function saveUIState(){ localStorage.setItem('ab_top_state', JSON.stringify({type:state.type, sort:state.sort, pageSize:state.pageSize})); }
-    function loadUIState(){ try{ const x=JSON.parse(localStorage.getItem('ab_top_state')); if(x){ state.type=x.type||state.type; state.sort=x.sort||state.sort; state.pageSize=x.pageSize||state.pageSize; } }catch(e){} }
+    /* ===================== HELPERS ===================== */
+    const $ = s => document.querySelector(s);
+    const $$ = s => document.querySelectorAll(s);
+    const debounce = (fn,ms)=>{ let t; return (...a)=>{ clearTimeout(t); t=setTimeout(()=>fn(...a),ms); } };
+    const playSFX=()=>{ const s=$('#sfx'); try{ s.volume=0.35; s.currentTime=0; s.play(); }catch(e){} };
+    const showToast=(m)=>{ const el=$('#toast'); el.textContent=m; el.classList.add('show'); setTimeout(()=>el.classList.remove('show'),1400); };
+    const openModal=(t,h)=>{ $('#modalTitle').textContent=t; $('#modalBody').innerHTML=h; $('#modal').classList.add('open'); };
+    const closeModal=()=>$('#modal').classList.remove('open');
+    const toggleSidebar=(force)=>{ const sb=$('#sidebar'); if(force===true) sb.classList.add('open'); else if(force===false) sb.classList.remove('open'); else sb.classList.toggle('open'); };
 
     /* ===================== NAV ===================== */
-    const viewCal = $('#view-cal');
-    const viewTop = $('#view-top');
-
+    const viewCal=$('#view-cal'); const viewTop=$('#view-top');
     $('#btnMenu').addEventListener('click', ()=>toggleSidebar());
     $('#nav-cal').addEventListener('click', ()=>{ show('cal'); $('#nav-cal').classList.add('active'); $('#nav-top').classList.remove('active'); toggleSidebar(false); });
     $('#nav-top').addEventListener('click', ()=>{ buildTop(); show('top'); playSFX(); $('#nav-top').classList.add('active'); $('#nav-cal').classList.remove('active'); toggleSidebar(false); });
-    $('#btn-back').addEventListener('click', ()=>{ show('cal'); });
+    $('#btn-back').addEventListener('click', ()=>show('cal'));
+    function show(v){ viewCal.classList.toggle('active', v==='cal'); viewTop.classList.toggle('active', v==='top'); }
 
-    function show(view){ viewCal.classList.remove('active'); viewTop.classList.remove('active'); if(view==='cal') viewCal.classList.add('active'); if(view==='top') viewTop.classList.add('active'); }
-
-    /* ===================== LOAD DATA ===================== */
-    document.addEventListener('DOMContentLoaded', async ()=>{
-      loadUIState();
-      const res = await fetch(API_URL);
+    /* ===================== DATA ===================== */
+    async function loadData(){
+      const res = await fetch(API_URL + "&_=" + Date.now());
       const json = await res.json();
-      STREAMS = json.streams || {};
-      ASIST = json.asistencia || [];
-      initCalendar();
-      // Precompute counters for fast switches
-      precomputeCounts();
-      // shortcuts
-      document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); if(e.key==='/'){ e.preventDefault(); $('#search').focus(); } });
-    });
 
-    /* ===================== CALENDAR ===================== */
+      STREAMS = json.streams || {};
+
+      // Anti “1 fantasma”: filtra filas inválidas
+      ASIST = (json.asistencia || []).filter(r=>{
+        const fecha=r[0], user=r[1], tipo=r[2];
+        if(!user || !String(user).trim()) return false;
+        if(!['normal','tarde','extra'].includes(tipo)) return false;
+        if(!fecha || isNaN(Date.parse(fecha))) return false;
+        return true;
+      });
+    }
+
+    /* ===================== CALENDARIO ===================== */
+    let calendar;
     function initCalendar(){
       const el = $('#calendar');
-      const cal = new FullCalendar.Calendar(el,{
-        height: '100%',
-        expandRows: true,
+      if(calendar){ try{ calendar.destroy(); }catch(e){} }
+      calendar = new FullCalendar.Calendar(el,{
+        height:'100%',
+        expandRows:true,
         initialView:'dayGridMonth',
         locale:'es',
         timeZone: ZONE,
         headerToolbar:{ left:'prev,next today', center:'title', right:'dayGridMonth,timeGridWeek' },
-        dayCellDidMount(arg){
-          const iso = arg.date.toISOString().split('T')[0];
-          if(STREAMS[iso]) arg.el.classList.add('fc-day-with-stream');
+        dayCellDidMount(info){
+          const iso = info.date.toISOString().split('T')[0];
+          if(STREAMS[iso]) info.el.classList.add('fc-day-with-stream');
         },
         dateClick(info){
           const f = info.dateStr;
           if(!STREAMS[f]) return;
-          const list = ASIST.filter(a=> new Date(a[0]).toLocaleDateString('en-CA',{timeZone:ZONE}) === f);
+          const list = ASIST.filter(a => new Date(a[0]).toLocaleDateString('en-CA',{timeZone:ZONE}) === f);
           const html = list.length
-            ? <ul style="list-style:none; padding:0; margin:0">${list.map(a=><li style='padding:8px 0; border-bottom:1px dashed var(--border)'><b>${a[1]}</b> <span style='color:var(--neon-pink)'>(${a[2]})</span></li>).join('')}</ul>
+            ? `<ul style="list-style:none; padding:0; margin:0">
+                 ${list.map(a=>`<li style="padding:8px 0; border-bottom:1px dashed var(--border)"><b>${a[1]}</b> <span style="color:var(--neon-pink)">(${a[2]})</span></li>`).join('')}
+               </ul>`
             : '<p>Sin registros.</p>';
-          openModal(Asistencias — ${f}, html); playSFX();
+          openModal(`Asistencias — ${f}`, html);
+          playSFX();
         }
       });
-      cal.render();
+      calendar.render();
     }
 
-    // Modal close events
-    $('#modalClose').addEventListener('click', closeModal);
-    $('#modal').addEventListener('click', (e)=>{ if(e.target.id==='modal') closeModal(); });
+    function recolorCalendarDays(){
+      $$('.fc-daygrid-day').forEach(c=>c.classList.remove('fc-day-with-stream'));
+      $$('.fc-daygrid-day').forEach(cell=>{
+        const d = cell.getAttribute('data-date');
+        if(d && STREAMS[d]) cell.classList.add('fc-day-with-stream');
+      });
+    }
 
     /* ===================== TOP ASISTENCIAS ===================== */
-    const $search = $('#search');
-    const $type = $('#type');
-    const $sort = $('#sort');
-    const $pageSize = $('#pageSize');
-    const $list = $('#list');
-    const $pageInfo = $('#pageInfo');
-    const $prev = $('#prev');
-    const $next = $('#next');
-    const $btnReset = $('#btnReset');
+    const $search=$('#search'), $type=$('#type'), $sort=$('#sort'),
+          $pageSize=$('#pageSize'), $list=$('#list'), $pageInfo=$('#pageInfo'),
+          $prev=$('#prev'), $next=$('#next'), $btnReset=$('#btnReset');
 
-    // Debounced search
-    $search.addEventListener('input', debounce(()=>{ state.query = ($search.value||'').trim().toLowerCase(); state.page=1; renderTop(); }, 180));
-    $type.addEventListener('change', ()=>{ state.type = $type.value; state.page=1; buildTop(); saveUIState(); showToast('Filtro aplicado'); });
-    $sort.addEventListener('change', ()=>{ state.sort = $sort.value; state.page=1; renderTop(); saveUIState(); });
-    $pageSize.addEventListener('change', ()=>{ state.pageSize = parseInt($pageSize.value,10); state.page=1; renderTop(); saveUIState(); });
+    $search.addEventListener('input', debounce(()=>{ state.query=($search.value||'').trim().toLowerCase(); state.page=1; renderTop(); }, 140));
+    $type.addEventListener('change', ()=>{ state.type=$type.value; state.page=1; buildTop(); showToast('Filtro aplicado'); });
+    $sort.addEventListener('change', ()=>{ state.sort=$sort.value; state.page=1; renderTop(); });
+    $pageSize.addEventListener('change', ()=>{ state.pageSize=parseInt($pageSize.value,10); state.page=1; renderTop(); });
     $prev.addEventListener('click', ()=>{ if(state.page>1){ state.page--; renderTop(); } });
-    $next.addEventListener('click', ()=>{ const max = Math.ceil(state.rows.length/state.pageSize)||1; if(state.page<max){ state.page++; renderTop(); } });
-    $btnReset.addEventListener('click', ()=>{ $search.value=''; state.query=''; $type.value='all'; state.type='all'; $sort.value='DESC'; state.sort='DESC'; state.page=1; state.pageSize=parseInt($pageSize.value,10); buildTop(); showToast('Filtros reiniciados'); });
+    $next.addEventListener('click', ()=>{ const max=Math.ceil(state.rows.length/state.pageSize)||1; if(state.page<max){ state.page++; renderTop(); } });
+    $btnReset.addEventListener('click', ()=>{ $search.value=''; state.query=''; $type.value='all'; state.type='all'; $sort.value='DESC'; state.sort='DESC'; state.page=1; renderTop(); showToast('Filtros reiniciados'); });
 
     function precomputeCounts(){
-      const types = ['all','normal','tarde','extra'];
-      for(const t of types){ memoCounts.set(t, new Map()); }
+      memoCounts.clear();
+      const types=['all','normal','tarde','extra'];
+      for(const t of types) memoCounts.set(t,new Map());
       for(const r of ASIST){
         const user=r[1], tipo=r[2];
-        // all
         memoCounts.get('all').set(user,(memoCounts.get('all').get(user)||0)+1);
-        // specific
         if(memoCounts.has(tipo)) memoCounts.get(tipo).set(user,(memoCounts.get(tipo).get(user)||0)+1);
       }
     }
@@ -368,37 +370,55 @@
     function renderTop(){
       let rows = state.rows.slice();
 
-      // búsqueda
-      if(state.query){ rows = rows.filter(r => r.user.toLowerCase().includes(state.query)); }
+      if(state.query) rows = rows.filter(r => r.user.toLowerCase().includes(state.query));
 
-      // orden
-      if(state.sort === 'DESC') rows.sort((a,b)=> b.count - a.count);
-      if(state.sort === 'ASC') rows.sort((a,b)=> a.count - b.count);
-      if(state.sort === 'AZ') rows.sort((a,b)=> a.user.localeCompare(b.user));
-      if(state.sort === 'ZA') rows.sort((a,b)=> b.user.localeCompare(a.user));
+      if(state.sort==='DESC') rows.sort((a,b)=> b.count - a.count);
+      if(state.sort==='ASC') rows.sort((a,b)=> a.count - b.count);
+      if(state.sort==='AZ')  rows.sort((a,b)=> a.user.localeCompare(b.user));
+      if(state.sort==='ZA')  rows.sort((a,b)=> b.user.localeCompare(a.user));
 
-      // paginación
       const total = rows.length;
       const maxPage = Math.max(1, Math.ceil(total / state.pageSize));
       if(state.page > maxPage) state.page = maxPage;
+
       const start = (state.page-1)*state.pageSize;
       const end = start + state.pageSize;
       const pageRows = rows.slice(start,end);
 
-      // pintar
       $list.innerHTML = '';
       const frag = document.createDocumentFragment();
       for(const r of pageRows){
-        const liName=document.createElement('li'); liName.innerHTML=<span class="badge">${r.user}</span>;
-        const liCount=document.createElement('li'); liCount.innerHTML=<span class="count">${r.count}</span>;
+        const liName=document.createElement('li');  liName.innerHTML = `<span class="badge">${r.user}</span>`;
+        const liCount=document.createElement('li'); liCount.innerHTML = `<span class="count">${r.count}</span>`;
         frag.appendChild(liName); frag.appendChild(liCount);
       }
       $list.appendChild(frag);
 
-      $pageInfo.textContent = Página ${state.page} / ${maxPage} — ${total} usuarios;
-      // scroll suave al inicio del listado
+      $pageInfo.textContent = `Página ${state.page} / ${maxPage} — ${total} usuarios`;
       $list.scrollTo({top:0, behavior:'smooth'});
     }
+
+    /* ===================== STARTUP ===================== */
+    document.addEventListener('DOMContentLoaded', async ()=>{
+      await loadData();
+      initCalendar();
+      precomputeCounts();
+
+      // atajos
+      document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); if(e.key==='/'){ e.preventDefault(); $search.focus(); } });
+
+      // auto-refresh cada 30s
+      setInterval(async ()=>{
+        await loadData();
+        recolorCalendarDays();
+        precomputeCounts();
+        if(viewTop.classList.contains('active')) buildTop();
+      }, 30000);
+    });
+
+    // Modal close
+    $('#modalClose').addEventListener('click', closeModal);
+    $('#modal').addEventListener('click', (e)=>{ if(e.target.id==='modal') closeModal(); });
   </script>
 </body>
 </html>
