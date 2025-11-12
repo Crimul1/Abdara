@@ -246,8 +246,8 @@
 
   <script>
     /* ===================== CONFIG ===================== */
-    // ¡URL ARREGLADA! Puse la que sabíamos que funcionaba.
-    const API_URL = "https://script.google.com/macros/s/AKfycbx6WjqODhuetXMwsAtzfvXY539Quj1exnRz7s7J6FQBH2UAlag6Brs6InxPsRS3uq2F/exec?webAction=get_all_data";
+    // ¡URL ACTUALIZADA!
+    const API_URL = "https://script.google.com/macros/s/AKfycbwRLrjylJOxArnAjywtX39XPVY1aY49QYoxvJq_INVoEMl9kLssS-EH5PtUYfHAYYlc/exec?webAction=get_all_data";
     const ZONE = "America/Guatemala";
 
     let STREAMS = {};
@@ -277,7 +277,6 @@
 
     /* ===================== DATA ===================== */
     async function loadData(){
-      // ¡ARREGLADO! Añadido try...catch para manejar errores de red/API
       try {
         const res = await fetch(API_URL + "&_=" + Date.now());
         if (!res.ok) {
@@ -406,14 +405,12 @@
 
     /* ===================== STARTUP ===================== */
     document.addEventListener('DOMContentLoaded', async ()=>{
-      // ¡ARREGLADO! Añadido try...catch para que la página no muera si falla el fetch
       try {
         await loadData();
         initCalendar();
         precomputeCounts();
       } catch (error) {
         console.error("Error fatal en el inicio:", error);
-        // Mostrar un error al usuario si la carga inicial falla
         $('#calendarWrap').innerHTML = `<h2 style="color:var(--neon-pink)">Error al cargar</h2><p>No se pudo conectar con la base de datos. Revisa que la URL de Google Script sea correcta o inténtalo de nuevo.</p>`;
       }
 
@@ -426,7 +423,6 @@
           await loadData();
           recolorCalendarDays();
           precomputeCounts();
-          // Si el usuario está viendo el Top, actualizarlo
           if(viewTop.classList.contains('active')) buildTop();
         } catch (e) {
           console.warn("Fallo el auto-refresh", e);
