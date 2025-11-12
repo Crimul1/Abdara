@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Asistencia de Abdara</title>
+    <style>
+        /* Estilos básicos para que no se vea tan feo */
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 20px;
+        }
+        #calendario {
+            max-width: 900px;
+            margin: 0 auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        #top3 {
+            max-width: 900px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+        }
+        button {
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Calendario de Asistencia</h1>
+
+    <div id="calendario">
+        <p>Cargando calendario...</p>
+    </div>
+
+    <div id="top3">
+        <h2>Top 3 Asistencias</h2>
+        <button id="btnTop3">Mostrar Top 3</button>
+        <ul id="listaTop3">
+            </ul>
+    </div>
+
+    <script>
+        // --- CONFIGURACIÓN ---
+        // ¡Esta es la URL que probaste!
+        const API_URL = "https://script.google.com/macros/s/AKfycbx6WjqODhuetXMwsAtzfvXY539Quj1exnRz7s7J6FQBH2UAlag6Brs6InxPsRS3uq2F/exec?webAction=get_all_data";
+        
+        // --- LÓGICA DE LA WEB ---
+
+        // 1. Esperar a que la página cargue
+        document.addEventListener("DOMContentLoaded", () => {
+            cargarDatos();
+        });
+
+        // 2. Función para traer los datos del Google Sheet
+        async function cargarDatos() {
+            try {
+                const response = await fetch(API_URL);
+                const data = await response.json();
+                
+                // ¡Éxito! Tenemos los datos.
+                console.log("Datos recibidos:", data);
+
+                // Próximos pasos (aún no los hemos escrito):
+                // renderizarCalendario(data.streams);
+                // prepararBotonTop3(data.asistencia);
+
+            } catch (error) {
+                console.error("Error al cargar los datos:", error);
+                document.getElementById("calendario").innerHTML = "<p>Error al cargar los datos.</p>";
+            }
+        }
+
+    </script>
+</body>
+</html>
