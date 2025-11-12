@@ -5,42 +5,69 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Asistencia de Abdara</title>
     <style>
-        /* Estilos básicos para que no se vea tan feo */
         body {
             font-family: Arial, sans-serif;
             background-color: #f4f4f4;
             margin: 20px;
+            color: #333;
         }
-        #calendario {
+        .container {
             max-width: 900px;
             margin: 0 auto;
             background: #fff;
             padding: 20px;
             border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
-        #top3 {
-            max-width: 900px;
-            margin: 20px auto;
-            background: #fff;
-            padding: 20px;
-            border-radius: 8px;
+        h1, h2 {
+            text-align: center;
         }
-        button {
+        
+        /* Estilos del Calendario */
+        #calendario {
+            margin-bottom: 20px;
+        }
+        /* Color para días con stream */
+        .fc-day-with-stream {
+            background-color: #e0f7fa !important;
+            cursor: pointer;
+        }
+        
+        /* Estilos del Top 3 */
+        #btnTop3 {
+            display: block;
+            margin: 10px auto;
             padding: 10px 15px;
             font-size: 16px;
             cursor: pointer;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
         }
+        #listaTop3 {
+            list-style-type: decimal;
+            padding-left: 30px;
+        }
+        #listaTop3 li {
+            font-size: 1.1em;
+            margin-bottom: 5px;
+        }
+
     </style>
+    
+    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.13/index.global.min.js'></script>
 </head>
 <body>
 
-    <h1>Calendario de Asistencia</h1>
-
-    <div id="calendario">
-        <p>Cargando calendario...</p>
+    <div class="container">
+        <h1>Calendario de Asistencia</h1>
+        <div id="calendario">
+            <p>Cargando calendario...</p>
+        </div>
     </div>
 
-    <div id="top3">
+    <div class="container" id="top3">
         <h2>Top 3 Asistencias</h2>
         <button id="btnTop3">Mostrar Top 3</button>
         <ul id="listaTop3">
@@ -49,33 +76,153 @@
 
     <script>
         // --- CONFIGURACIÓN ---
-        // ¡Esta es la URL que probaste!
         const API_URL = "https://script.google.com/macros/s/AKfycbx6WjqODhuetXMwsAtzfvXY539Quj1exnRz7s7J6FQBH2UAlag6Brs6InxPsRS3uq2F/exec?webAction=get_all_data";
         
+        // Zona horaria para GTM-6 (ej: Guatemala)
+        const TIME_ZONE = "America/Guatemala"; 
+
         // --- LÓGICA DE LA WEB ---
 
-        // 1. Esperar a que la página cargue
         document.addEventListener("DOMContentLoaded", () => {
             cargarDatos();
+            // Asignar el evento al botón
+            document.getElementById("btnTop3").addEventListener("click", () => {
+                // Hacemos esto para no tener que recargar los datos
+                if (window.datosAsistencia) {
+                    prepararBotonTop3(window.datosAsistencia);
+                }
+            });
         });
 
-        // 2. Función para traer los datos del Google Sheet
         async function cargarDatos() {
             try {
                 const response = await fetch(API_URL);
                 const data = await response.json();
                 
-                // ¡Éxito! Tenemos los datos.
                 console.log("Datos recibidos:", data);
+                
+                // Guardamos los datos globalmente para usarlos en el botón
+                window.datosAsistencia = data.asistencia; 
 
-                // Próximos pasos (aún no los hemos escrito):
-                // renderizarCalendario(data.streams);
-                // prepararBotonTop3(data.asistencia);
+                // Ahora sí, llamamos a las funciones que dibujan
+                renderizarCalendario(data.streams, data.asistencia);
 
             } catch (error) {
                 console.error("Error al cargar los datos:", error);
                 document.getElementById("calendario").innerHTML = "<p>Error al cargar los datos.</p>";
             }
+        }
+
+        // --- FUNCIÓN DEL CALENDARIO ---
+        function renderizarCalendario(streams, asistencias) {
+            const calendarioEl = document.getElementById('calendario');
+            
+            // Procesamos los eventos para FullCalendar
+            const eventos = [];
+            for (const date in streams) {
+                eventos.push({
+                    title: 'Stream',
+                    start: streams[date].startTimeUTC, // FullCalendar entiende UTC
+                    allDay: false,
+                    // Guardamos la fecha (YYYY-MM-DD) para buscarla luego
+                    fechaSimple: date 
+                });
+            }
+
+            const calendar = new FullCalendar.Calendar(calendarioEl, {
+                initialView: 'dayGridMonth', // Vista mensual
+                locale: 'es', // En español
+                timeZone: TIME_ZONE, // Mostrar horas en GTM-6
+                headerToolbar: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: 'dayGridMonth,timeGridWeek'
+                },
+                events: eventos, // Los streams que procesamos
+
+                // Pintar los días que hubo stream
+                dayCellDidMount: function(arg) {
+                    const fechaSimple = arg.date.toISOString().split('T')[0];
+                    if (streams[fechaSimple]) {
+                        arg.el.classList.add('fc-day-with-stream');
+                    }
+                },
+                
+                // Al hacer clic en un día
+                dateClick: function(info) {
+                    // Si el día no tuvo stream, no hacer nada
+                    if (!streams[info.dateStr]) {
+                        alert("No hubo stream ese día.");
+                        return;
+                    }
+                    
+                    // Buscar asistencias de ESE día
+                    // info.dateStr es la fecha YYYY-MM-DD
+                    const asistenciasDelDia = asistencias.filter(a => {
+                        // Convertimos el timestamp UTC a la fecha GTM-6
+                        const fechaAsistencia = new Date(a[0]).toLocaleDateString('en-CA', { timeZone: TIME_ZONE });
+                        return fechaAsistencia === info.dateStr;
+                    });
+                    
+                    let resumen = `Asistencias del ${info.dateStr}:\n\n`;
+                    if (asistenciasDelDia.length > 0) {
+                        asistenciasDelDia.forEach(a => {
+                            // a[1] = usuario, a[2] = tipo
+                            resumen += `• ${a[1]} (${a[2]})\n`; 
+                        });
+                    } else {
+                        resumen += "No se registraron asistencias.";
+                    }
+                    alert(resumen); // Mostramos un simple alert
+                }
+            });
+
+            calendar.render();
+        }
+
+        // --- FUNCIÓN DEL TOP 3 ---
+        function prepararBotonTop3(asistencias) {
+            const conteo = {}; // { "usuario": 10, "otro_usuario": 5 }
+            
+            asistencias.forEach(registro => {
+                const usuario = registro[1];
+                const tipo = registro[2];
+                
+                // Solo contamos "normal" y "tarde" (excluimos "extra")
+                if (tipo === "normal" || tipo === "tarde") {
+                    if (conteo[usuario]) {
+                        conteo[usuario]++;
+                    } else {
+                        conteo[usuario] = 1;
+                    }
+                }
+            });
+            
+            // Convertir el objeto a un array para ordenarlo
+            const arrayConteo = Object.entries(conteo); // [ ["usuario", 10], ["otro", 5] ]
+            
+            // Ordenar de mayor a menor
+            arrayConteo.sort((a, b) => b[1] - a[1]);
+            
+            // Tomar los 3 primeros
+            const top3 = arrayConteo.slice(0, 3);
+            
+            // Mostrar en la web
+            const listaEl = document.getElementById("listaTop3");
+            listaEl.innerHTML = ""; // Limpiar lista anterior
+            
+            if (top3.length === 0) {
+                 listaEl.innerHTML = "<li>Aún no hay asistencias para mostrar.</li>";
+                 return;
+            }
+
+            top3.forEach(item => {
+                const usuario = item[0];
+                const total = item[1];
+                const li = document.createElement("li");
+                li.textContent = `${usuario} (${total} asistencias)`;
+                listaEl.appendChild(li);
+            });
         }
 
     </script>
