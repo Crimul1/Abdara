@@ -12,7 +12,7 @@ CLIENT_ID = "u4jxn8cgm5ki14grzcmedwc8yh5pr5"
 # Info del Canal
 BOT_NAME = "crimul_bot"
 CHANNEL = "abdara12"
-BROADCASTER_ID = "590702441"  # ID numérico del streamer
+BROADCASTER_ID = "212158819"  # ID numérico del streamer
 
 # URL de Google Apps Script (¡Verifica que sea la tuya!)
 GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbztCP3mW8PQ7e90UZ5H2iTcK0GIi1oHlI4TefBQ-KX0efxWNC2tpvBqimYab-uvn-3n/exec"
@@ -164,4 +164,5 @@ if __name__ == "__main__":
         asyncio.run(main())
     except KeyboardInterrupt:
         print("\nCerrando bot...")
+
 
