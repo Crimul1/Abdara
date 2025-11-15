@@ -3,20 +3,22 @@ import websockets
 import requests
 
 # ========= CONFIG =========
-TOKEN = "kk7bd8x8qhxeww4x147s1s2rdh0gq6"
-APP_TOKEN = "epaglgmhskyal8sesozk0egutp7w47"
+TOKEN = "kk7bd8x8qhxeww4x147s1s2rdh0gq6"         # Token del bot (sin "oauth:")
+APP_TOKEN = "epaglgmhskyal8sesozk0egutp7w47"     # Token de App (Twitch API)
 CLIENT_ID = "u4jxn8cgm5ki14grzcmedwc8yh5pr5"
 
 BOT_NAME = "crimul_bot"
 CHANNEL = "abdara12"
-BROADCASTER_ID = "212158819"
+BROADCASTER_ID = "212158819"                     # ID del streamer
 
-GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwky0NBGWFlNIl0qU2jYfX-2AjsszZvM2z3d_5lutQO8bspLgG4zgQibtVklN7lz8fX/exec"
+# NUEVA URL DEL SCRIPT
+GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxKd6a5ILT3qfbK91f4gvkHqKyRZWwoHFhYkVcHrGfHUyhr0v8gp1lWG9McrXs6rQIm/exec"
 
 POLL_INTERVAL = 60   # 1 minuto
 # ==========================
 
 
+# ========= CHAT LISTENER =========
 async def connect_to_chat():
     uri = "wss://irc-ws.chat.twitch.tv:443"
 
@@ -43,13 +45,13 @@ async def connect_to_chat():
 
                         print(f"  (Chat) {username}: {text}")
 
-                        # --- ASISTENCIA ---
+                        # ------------ ASISTENCIA NORMAL / TARDE ------------
                         if text.startswith("!asistencia"):
                             print(f"⚡ Registrando asistencia de {username}")
                             try:
                                 r = requests.get(GAS_WEBHOOK_URL, params={
                                     "action": "asistencia",
-                                    "user": username
+                                    "user": username.lower()
                                 }, timeout=5)
 
                                 resp = r.text.strip()
@@ -62,34 +64,36 @@ async def connect_to_chat():
                                     print(f"⚠️ GAS dijo: {resp}")
 
                             except Exception as e:
-                                print(f"ERROR: {e}")
+                                print(f"ERROR enviando asistencia: {e}")
 
-                        # --- EXTRA ---
+                        # ------------ ASISTENCIA EXTRA ------------
                         elif text == "!asistenciaextra":
                             print(f"⚡ Registrando extra de {username}")
                             try:
                                 r = requests.get(GAS_WEBHOOK_URL, params={
                                     "action": "extra",
-                                    "user": username
+                                    "user": username.lower()
                                 }, timeout=5)
 
                                 resp = r.text.strip()
 
                                 if resp == "extra_ya_registrada":
-                                    print(f"⛔ {username} ya registró extra.")
+                                    print(f"⛔ {username} ya registró asistencia extra.")
                                 elif resp == "extra_ok":
                                     print(f"✨ Extra OK para {username}")
                                 else:
                                     print(f"⚠️ GAS dijo: {resp}")
 
                             except Exception as e:
-                                print(f"ERROR: {e}")
+                                print(f"ERROR enviando asistencia extra: {e}")
 
         except Exception as e:
             print(f"⚠️ (Chat) Error: {e}. Reintentando...")
             await asyncio.sleep(10)
 
 
+
+# ========= STREAM STATUS POLLING =========
 async def poll_stream_status():
     global stream_is_online
 
@@ -99,7 +103,7 @@ async def poll_stream_status():
         "Authorization": f"Bearer {APP_TOKEN}"
     }
 
-    print("Iniciando polling cada 1 minuto...")
+    print("📡 Polling cada 1 minuto...")
 
     while True:
         try:
@@ -129,6 +133,8 @@ async def poll_stream_status():
             await asyncio.sleep(60)
 
 
+
+# ========= MAIN =========
 async def main():
     task1 = asyncio.create_task(connect_to_chat())
     task2 = asyncio.create_task(poll_stream_status())
@@ -138,7 +144,7 @@ async def main():
 if __name__ == "__main__":
     stream_is_online = False
 
-    print("=== BOT ASISTENCIA v3 ===")
+    print("=== BOT ASISTENCIA v3 — FINAL ===")
     print(f"URL GAS: {GAS_WEBHOOK_URL}")
 
     try:
