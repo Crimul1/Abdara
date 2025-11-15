@@ -1,32 +1,26 @@
 import asyncio
 import websockets
 import requests
-import time
 
 # ========= CONFIG =========
-# Tokens y Nombres
-TOKEN = "kk7bd8x8qhxeww4x147s1s2rdh0gq6"  # SIN "oauth:" (Tu token de bot)
-APP_TOKEN = "epaglgmhskyal8sesozk0egutp7w47"  # Token de App (para la API)
+TOKEN = "kk7bd8x8qhxeww4x147s1s2rdh0gq6"
+APP_TOKEN = "epaglgmhskyal8sesozk0egutp7w47"
 CLIENT_ID = "u4jxn8cgm5ki14grzcmedwc8yh5pr5"
 
-# Info del Canal
 BOT_NAME = "crimul_bot"
 CHANNEL = "abdara12"
-BROADCASTER_ID = "212158819"  # ID numérico del streamer
+BROADCASTER_ID = "212158819"
 
-# URL de Google Apps Script (¡Verifica que sea la tuya!)
-GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbyVI8Zjm3gWKAmFZU1vKckjZA5NNBwh4ylibbmcIWvEAXh6xGYqAO22CMLualN1eQ1W/exec"
+GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbwky0NBGWFlNIl0qU2jYfX-2AjsszZvM2z3d_5lutQO8bspLgG4zgQibtVklN7lz8fX/exec"
 
-# Tiempo de chequeo de API (en segundos)
-POLL_INTERVAL = 300  # 300 segundos = 5 minutos
+POLL_INTERVAL = 60   # 1 minuto
 # ==========================
 
 
-# Tarea 1: Escuchar el chat de Twitch
 async def connect_to_chat():
     uri = "wss://irc-ws.chat.twitch.tv:443"
 
-    while True:  # Bucle de reconexión
+    while True:
         try:
             async with websockets.connect(uri) as ws:
                 await ws.send(f"PASS oauth:{TOKEN}")
@@ -43,16 +37,15 @@ async def connect_to_chat():
                         continue
 
                     if "PRIVMSG" in msg:
-                        # Extrae el usuario y el texto
-                        prefix = msg.split("PRIVMSG", 1)[0]
-                        username = prefix.split("display-name=", 1)[1].split(";", 1)[0]
-                        text = msg.split("PRIVMSG", 1)[1].split(" :", 1)[1].strip().lower()
+                        prefix = msg.split("PRIVMSG")[0]
+                        username = prefix.split("display-name=",1)[1].split(";",1)[0]
+                        text = msg.split("PRIVMSG",1)[1].split(" :",1)[1].strip().lower()
 
                         print(f"  (Chat) {username}: {text}")
 
-                        # --- Lógica de Comandos ---
+                        # --- ASISTENCIA ---
                         if text.startswith("!asistencia"):
-                            print(f"⚡ (Chat) Registrando !asistencia para {username}")
+                            print(f"⚡ Registrando asistencia de {username}")
                             try:
                                 r = requests.get(GAS_WEBHOOK_URL, params={
                                     "action": "asistencia",
@@ -61,19 +54,19 @@ async def connect_to_chat():
 
                                 resp = r.text.strip()
 
-                                # 🔒 NUEVO: manejo de límite
                                 if resp == "ya_registrado":
                                     print(f"⛔ {username} ya registró asistencia.")
                                 elif resp in ("normal", "tarde"):
-                                    print(f"✅ Asistencia guardada para {username}: {resp}")
+                                    print(f"✅ Asistencia {resp} para {username}")
                                 else:
-                                    print(f"⚠️ Respuesta GAS: {resp}")
+                                    print(f"⚠️ GAS dijo: {resp}")
 
-                            except requests.RequestException as e:
-                                print(f"ERROR al enviar !asistencia: {e}")
+                            except Exception as e:
+                                print(f"ERROR: {e}")
 
+                        # --- EXTRA ---
                         elif text == "!asistenciaextra":
-                            print(f"⚡ (Chat) Registrando !asistenciaextra para {username}")
+                            print(f"⚡ Registrando extra de {username}")
                             try:
                                 r = requests.get(GAS_WEBHOOK_URL, params={
                                     "action": "extra",
@@ -82,89 +75,73 @@ async def connect_to_chat():
 
                                 resp = r.text.strip()
 
-                                # 🔒 NUEVO: manejo de límite para extra
                                 if resp == "extra_ya_registrada":
-                                    print(f"⛔ {username} ya registró la asistencia extra.")
+                                    print(f"⛔ {username} ya registró extra.")
                                 elif resp == "extra_ok":
-                                    print(f"✨ Asistencia EXTRA guardada para {username}")
+                                    print(f"✨ Extra OK para {username}")
                                 else:
-                                    print(f"⚠️ Respuesta GAS: {resp}")
+                                    print(f"⚠️ GAS dijo: {resp}")
 
-                            except requests.RequestException as e:
-                                print(f"ERROR al enviar !asistenciaextra: {e}")
+                            except Exception as e:
+                                print(f"ERROR: {e}")
 
-        except websockets.exceptions.ConnectionClosed:
-            print(f"⚠️ (Chat) Conexión perdida. Reconectando en 10 segundos...")
-            await asyncio.sleep(10)
         except Exception as e:
-            print(f"⚠️ (Chat) Error inesperado: {e}. Reconectando en 10 segundos...")
+            print(f"⚠️ (Chat) Error: {e}. Reintentando...")
             await asyncio.sleep(10)
 
 
-# Tarea 2: Preguntar a la API si el stream está vivo (Polling)
 async def poll_stream_status():
-    global stream_is_online  # Variable global para saber el estado
+    global stream_is_online
 
-    url_helix = f"https://api.twitch.tv/helix/streams?user_id={BROADCASTER_ID}"
+    url = f"https://api.twitch.tv/helix/streams?user_id={BROADCASTER_ID}"
     headers = {
         "Client-ID": CLIENT_ID,
         "Authorization": f"Bearer {APP_TOKEN}"
     }
 
-    print(" polling")
+    print("Iniciando polling cada 1 minuto...")
 
     while True:
         try:
-            r = requests.get(url_helix, headers=headers, timeout=5)
+            r = requests.get(url, headers=headers, timeout=5)
 
             if r.status_code == 200:
-                data = r.json().get("data", [])
+                live = len(r.json().get("data", [])) > 0
 
-                current_status_is_online = len(data) > 0
-
-                if current_status_is_online and not stream_is_online:
-                    print("🔴 (API) STREAM INICIADO. Guardando startTimeUTC...")
+                if live and not stream_is_online:
+                    print("🔴 STREAM INICIADO → Guardando startTimeUTC")
                     requests.get(GAS_WEBHOOK_URL, params={"action": "stream_start"}, timeout=5)
 
-                elif not current_status_is_online and stream_is_online:
-                    print("⚫ (API) STREAM FINALIZADO. Guardando endTimeUTC...")
+                elif not live and stream_is_online:
+                    print("⚫ STREAM FINALIZADO → Guardando endTimeUTC")
                     requests.get(GAS_WEBHOOK_URL, params={"action": "stream_stop"}, timeout=5)
 
-                stream_is_online = current_status_is_online
+                stream_is_online = live
 
             elif r.status_code == 401:
-                print("Error 401: Token (APP_TOKEN) inválido o expirado.")
-            
-            print(f"  (API) Chequeo realizado. Próximo chequeo en {POLL_INTERVAL} segundos.")
+                print("❌ Error 401: APP_TOKEN inválido o expirado")
+
+            print("  (API) Siguiente chequeo en 1 minuto...")
             await asyncio.sleep(POLL_INTERVAL)
 
-        except requests.RequestException as e:
-            print(f"⚠️ (API) Error de conexión al consultar API: {e}. Reintentando en 60s.")
-            await asyncio.sleep(60)
         except Exception as e:
-            print(f"⚠️ (API) Error inesperado: {e}. Reintentando en 60s.")
+            print(f"⚠️ (API) Error: {e}. Reintentando en 60s.")
             await asyncio.sleep(60)
 
 
-# Función principal
 async def main():
-    task_chat = asyncio.create_task(connect_to_chat())
-    task_api_poll = asyncio.create_task(poll_stream_status())
-    await asyncio.gather(task_chat, task_api_poll)
+    task1 = asyncio.create_task(connect_to_chat())
+    task2 = asyncio.create_task(poll_stream_status())
+    await asyncio.gather(task1, task2)
 
 
 if __name__ == "__main__":
     stream_is_online = False
 
-    print("=== INICIANDO BOT DE ASISTENCIA (Chat + Polling API) ===")
-    print(f"URL de Google Script: {GAS_WEBHOOK_URL}")
-    print("Presiona Ctrl+C para detener.")
+    print("=== BOT ASISTENCIA v3 ===")
+    print(f"URL GAS: {GAS_WEBHOOK_URL}")
 
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
         print("\nCerrando bot...")
-
-
-
-
