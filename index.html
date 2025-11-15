@@ -149,6 +149,17 @@
     .modal.open{ display:grid; animation:fade .2s ease; }
     .modal .box{ width:min(720px, 92vw); max-height:80vh; overflow:auto; background:var(--bg-card); border:1px solid var(--border); border-radius:16px; padding:16px; box-shadow:0 0 24px rgba(141,58,255,.25); }
 
+    /* FIX DEL MODAL */
+    .modalList li{
+      padding:10px 0;
+      border-bottom:1px dashed var(--border);
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+    }
+    .mUser{ font-weight:700; }
+    .mTipo{ color:var(--neon-pink); font-weight:700; }
+
     .toast{ position:fixed; right:16px; bottom:16px; background:#141414; border:1px solid var(--border); color:#fff; padding:10px 14px; border-radius:10px; box-shadow:0 0 14px rgba(141,58,255,.25); opacity:0; transform:translateY(10px); transition:.25s; z-index:60; }
     .toast.show{ opacity:1; transform:none; }
 
@@ -246,7 +257,7 @@
 
   <script>
     /* ===================== CONFIG ===================== */
-const API_URL = "https://script.google.com/macros/s/AKfycbwky0NBGWFlNIl0qU2jYfX-2AjsszZvM2z3d_5lutQO8bspLgG4zgQibtVklN7lz8fX/exec?webAction=get_all_data";
+const API_URL = "https://script.google.com/macros/s/AKfycbxKd6a5ILT3qfbK91f4gvkHqKyRZWwoHFhYkVcHrGfHUyhr0v8gp1lWG9McrXs6rQIm/exec?webAction=get_all_data";
 const ZONE = "America/Guatemala";
 
     let STREAMS = {};
@@ -278,15 +289,12 @@ const ZONE = "America/Guatemala";
     async function loadData(){
       try {
         const res = await fetch(API_URL + "&_=" + Date.now());
-        if (!res.ok) {
-          throw new Error(`Error HTTP: ${res.status}`);
-        }
+        if (!res.ok) throw new Error(`Error HTTP: ${res.status}`);
         
         const json = await res.json();
 
         STREAMS = json.streams || {};
 
-        // Anti “1 fantasma”: filtra filas inválidas
         ASIST = (json.asistencia || []).filter(r=>{
           const fecha=r[0], user=r[1], tipo=r[2];
           if(!user || !String(user).trim()) return false;
@@ -297,7 +305,7 @@ const ZONE = "America/Guatemala";
       } catch (error) {
         console.error("Error al cargar datos:", error);
         showToast("Error al conectar con la API.");
-        throw error; // Lanzar el error para que el inicio (startup) lo detenga
+        throw error;
       }
     }
 
@@ -320,12 +328,22 @@ const ZONE = "America/Guatemala";
         dateClick(info){
           const f = info.dateStr;
           if(!STREAMS[f]) return;
-          const list = ASIST.filter(a => new Date(a[0]).toLocaleDateString('en-CA',{timeZone:ZONE}) === f);
+
+          const list = ASIST.filter(a => 
+            new Date(a[0]).toLocaleDateString('en-CA',{timeZone:ZONE}) === f
+          );
+
           const html = list.length
-            ? `<ul style="list-style:none; padding:0; margin:0">
-                ${list.map(a=>`<li style="padding:8px 0; border-bottom:1px dashed var(--border)"><b>${a[1]}</b> <span style="color:var(--neon-pink)">(${a[2]})</span></li>`).join('')}
+            ? `<ul class="modalList">
+                ${list.map(a=>`
+                  <li>
+                    <span class="mUser">${a[1]}</span>
+                    <span class="mTipo">(${a[2]})</span>
+                  </li>
+                `).join("")}
               </ul>`
             : '<p>Sin registros.</p>';
+
           openModal(`Asistencias — ${f}`, html);
           playSFX();
         }
@@ -413,10 +431,11 @@ const ZONE = "America/Guatemala";
         $('#calendarWrap').innerHTML = `<h2 style="color:var(--neon-pink)">Error al cargar</h2><p>No se pudo conectar con la base de datos. Revisa que la URL de Google Script sea correcta o inténtalo de nuevo.</p>`;
       }
 
-      // atajos
-      document.addEventListener('keydown', (e)=>{ if(e.key==='Escape') closeModal(); if(e.key==='/'){ e.preventDefault(); $search.focus(); } });
+      document.addEventListener('keydown', (e)=>{ 
+        if(e.key==='Escape') closeModal(); 
+        if(e.key==='/'){ e.preventDefault(); $search.focus(); } 
+      });
 
-      // auto-refresh cada 30s
       setInterval(async ()=>{
         try {
           await loadData();
@@ -430,9 +449,10 @@ const ZONE = "America/Guatemala";
       }, 30000);
     });
 
-    // Modal close
     $('#modalClose').addEventListener('click', closeModal);
-    $('#modal').addEventListener('click', (e)=>{ if(e.target.id==='modal') closeModal(); });
+    $('#modal').addEventListener('click', (e)=>{ 
+      if(e.target.id==='modal') closeModal(); 
+    });
   </script>
 </body>
 </html>
