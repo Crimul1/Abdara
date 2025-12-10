@@ -15,8 +15,6 @@ BROADCASTER_ID = "212158819"                     # ID del streamer
 GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxKd6a5ILT3qfbK91f4gvkHqKyRZWwoHFhYkVcHrGfHUyhr0v8gp1lWG9McrXs6rQIm/exec"
 
 POLL_INTERVAL = 60   # 1 minuto
-# ==========================
-
 
 # ========= CHAT LISTENER =========
 async def connect_to_chat():
@@ -61,7 +59,7 @@ async def connect_to_chat():
                                 elif resp in ("normal", "tarde"):
                                     print(f"✅ Asistencia {resp} para {username}")
                                 else:
-                                    print(f"⚠️ GAS dijo: {resp}")
+                                    print(f"⚠ GAS dijo: {resp}")
 
                             except Exception as e:
                                 print(f"ERROR enviando asistencia: {e}")
@@ -82,13 +80,13 @@ async def connect_to_chat():
                                 elif resp == "extra_ok":
                                     print(f"✨ Extra OK para {username}")
                                 else:
-                                    print(f"⚠️ GAS dijo: {resp}")
+                                    print(f"⚠ GAS dijo: {resp}")
 
                             except Exception as e:
                                 print(f"ERROR enviando asistencia extra: {e}")
 
         except Exception as e:
-            print(f"⚠️ (Chat) Error: {e}. Reintentando...")
+            print(f"⚠ (Chat) Error: {e}. Reintentando...")
             await asyncio.sleep(10)
 
 
@@ -129,7 +127,7 @@ async def poll_stream_status():
             await asyncio.sleep(POLL_INTERVAL)
 
         except Exception as e:
-            print(f"⚠️ (API) Error: {e}. Reintentando en 60s.")
+            print(f"⚠ (API) Error: {e}. Reintentando en 60s.")
             await asyncio.sleep(60)
 
 
