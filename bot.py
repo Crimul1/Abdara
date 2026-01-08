@@ -1,152 +1,178 @@
 import asyncio
+import aiohttp
 import websockets
-import requests
-import os
-import threading
-from flask import Flask, send_file
+import time
+from datetime import datetime
 
-# ========= CONFIGURACIÓN WEB (PARA AZURE) =========
-app = Flask(__name__)
-
-@app.route('/')
-def index():
-    # Esto muestra tu página visual cuando entras a la URL de Azure
-    try:
-        return send_file("index.html") 
-    except Exception as e:
-        return "El bot está corriendo, pero no encuentro index.html"
-
-def run_web_server():
-    # Azure asigna un puerto dinámico en la variable de entorno PORT
-    port = int(os.environ.get("PORT", 8000))
-    app.run(host="0.0.0.0", port=port)
-
-# ========= CONFIG BOT =========
-TOKEN = "kk7bd8x8qhxeww4x147s1s2rdh0gq6"         # Token del bot (sin "oauth:")
-APP_TOKEN = "epaglgmhskyal8sesozk0egutp7w47"     # Token de App (Twitch API)
+# ================= CONFIG =================
+BOT_TOKEN = "kk7bd8x8qhxeww4x147s1s2rdh0gq6"       # sin "oauth:"
 CLIENT_ID = "u4jxn8cgm5ki14grzcmedwc8yh5pr5"
+CLIENT_SECRET = "dkn0m45gm7y7a5ka7e024eay1xxhro"
 
 BOT_NAME = "crimul_bot"
 CHANNEL = "abdara12"
-BROADCASTER_ID = "212158819"                     # ID del streamer
-GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbxKd6a5ILT3qfbK91f4gvkHqKyRZWwoHFhYkVcHrGfHUyhr0v8gp1lWG9McrXs6rQIm/exec"
+BROADCASTER_ID = "212158819"
 
-POLL_INTERVAL = 30   # <--- CAMBIADO A 30 SEGUNDOS
+GAS_WEBHOOK_URL = "https://script.google.com/macros/s/AKfycbysq-navVJ52ZYo1z5T3gBClLlRNhN07HMo84-dUwtH1-0SEgPF-ph6djJaupGR7bul/exec"
 
-stream_is_online = False # Variable global inicializada
+POLL_INTERVAL = 30  # 🔥 30 segundos (recomendado)
 
-# ========= CHAT LISTENER =========
+# ================= ESTADO =================
+stream_is_online = False
+processed_msg_ids = set()
+user_cooldown = {}
+
+# ================= UTILS =================
+def log(msg):
+    print(f"[{datetime.now().strftime('%H:%M:%S')}] {msg}")
+
+def in_cooldown(user, seconds=5):
+    now = time.time()
+    last = user_cooldown.get(user, 0)
+    if now - last < seconds:
+        return True
+    user_cooldown[user] = now
+    return False
+
+def already_processed(msg_id):
+    if msg_id in processed_msg_ids:
+        return True
+    processed_msg_ids.add(msg_id)
+    if len(processed_msg_ids) > 2000:
+        processed_msg_ids.clear()
+    return False
+
+# ================= TWITCH AUTH =================
+async def get_app_access_token(session):
+    url = "https://id.twitch.tv/oauth2/token"
+    params = {
+        "client_id": CLIENT_ID,
+        "client_secret": CLIENT_SECRET,
+        "grant_type": "client_credentials"
+    }
+
+    async with session.post(url, params=params) as r:
+        data = await r.json()
+        return data["access_token"]
+
+# ================= CHAT =================
 async def connect_to_chat():
     uri = "wss://irc-ws.chat.twitch.tv:443"
+    delay = 5
+
     while True:
         try:
             async with websockets.connect(uri) as ws:
-                await ws.send(f"PASS oauth:{TOKEN}")
+                await ws.send(f"PASS oauth:{BOT_TOKEN}")
                 await ws.send(f"NICK {BOT_NAME}")
                 await ws.send("CAP REQ :twitch.tv/commands twitch.tv/tags")
                 await ws.send(f"JOIN #{CHANNEL}")
-                print(f"✅ (Chat) Conectado a: {CHANNEL}")
+                log(f"✅ Chat conectado a #{CHANNEL}")
+                delay = 5
 
-                while True:
-                    msg = await ws.recv()
+                async for msg in ws:
                     if msg.startswith("PING"):
                         await ws.send("PONG :tmi.twitch.tv")
                         continue
-                    
-                    if "PRIVMSG" in msg:
-                        prefix = msg.split("PRIVMSG")[0]
-                        username = prefix.split("display-name=",1)[1].split(";",1)[0]
-                        text = msg.split("PRIVMSG",1)[1].split(" :",1)[1].strip().lower()
-                        print(f"  (Chat) {username}: {text}")
 
-                        # ------------ ASISTENCIA NORMAL / TARDE ------------
+                    if "RECONNECT" in msg:
+                        log("🔄 Twitch pidió RECONNECT")
+                        break
+
+                    if "PRIVMSG" not in msg:
+                        continue
+
+                    # ID del mensaje
+                    msg_id = None
+                    if "@id=" in msg:
+                        msg_id = msg.split("@id=", 1)[1].split(";", 1)[0]
+                        if already_processed(msg_id):
+                            continue
+
+                    prefix, content = msg.split("PRIVMSG", 1)
+                    username = "unknown"
+                    if "display-name=" in prefix:
+                        username = prefix.split("display-name=", 1)[1].split(";", 1)[0].lower()
+
+                    text = content.split(" :", 1)[1].strip().lower()
+                    log(f"{username}: {text}")
+
+                    if in_cooldown(username):
+                        continue
+
+                    async with aiohttp.ClientSession() as session:
                         if text.startswith("!asistencia"):
-                            print(f"⚡ Registrando asistencia de {username}")
-                            try:
-                                r = requests.get(GAS_WEBHOOK_URL, params={
-                                    "action": "asistencia",
-                                    "user": username.lower()
-                                }, timeout=5)
-                                resp = r.text.strip()
-                                if resp == "ya_registrado":
-                                    print(f"⛔ {username} ya registró asistencia.")
-                                elif resp in ("normal", "tarde"):
-                                    print(f"✅ Asistencia {resp} para {username}")
-                                else:
-                                    print(f"⚠ GAS dijo: {resp}")
-                            except Exception as e:
-                                print(f"ERROR enviando asistencia: {e}")
+                            async with session.get(GAS_WEBHOOK_URL, params={
+                                "action": "asistencia",
+                                "user": username
+                            }) as r:
+                                resp = await r.text()
+                                log(f"GAS → {resp}")
 
-                        # ------------ ASISTENCIA EXTRA ------------
                         elif text == "!asistenciaextra":
-                            print(f"⚡ Registrando extra de {username}")
-                            try:
-                                r = requests.get(GAS_WEBHOOK_URL, params={
-                                    "action": "extra",
-                                    "user": username.lower()
-                                }, timeout=5)
-                                resp = r.text.strip()
-                                if resp == "extra_ya_registrada":
-                                    print(f"⛔ {username} ya registró asistencia extra.")
-                                elif resp == "extra_ok":
-                                    print(f"✨ Extra OK para {username}")
-                                else:
-                                    print(f"⚠ GAS dijo: {resp}")
-                            except Exception as e:
-                                print(f"ERROR enviando asistencia extra: {e}")
+                            async with session.get(GAS_WEBHOOK_URL, params={
+                                "action": "extra",
+                                "user": username
+                            }) as r:
+                                resp = await r.text()
+                                log(f"GAS → {resp}")
 
         except Exception as e:
-            print(f"⚠ (Chat) Error: {e}. Reintentando...")
-            await asyncio.sleep(10)
+            log(f"⚠ Chat error: {e}")
+            await asyncio.sleep(delay)
+            delay = min(delay * 2, 300)
 
-# ========= STREAM STATUS POLLING =========
+# ================= STREAM POLLING =================
 async def poll_stream_status():
     global stream_is_online
-    url = f"https://api.twitch.tv/helix/streams?user_id={BROADCASTER_ID}"
-    headers = {"Client-ID": CLIENT_ID, "Authorization": f"Bearer {APP_TOKEN}"}
-    
-    print(f"📡 Polling cada {POLL_INTERVAL} segundos...")
-    while True:
-        try:
-            r = requests.get(url, headers=headers, timeout=5)
-            if r.status_code == 200:
-                live = len(r.json().get("data", [])) > 0
-                
-                if live and not stream_is_online:
-                    print("🔴 STREAM INICIADO → Guardando startTimeUTC")
-                    requests.get(GAS_WEBHOOK_URL, params={"action": "stream_start"}, timeout=5)
-                elif not live and stream_is_online:
-                    print("⚫ STREAM FINALIZADO → Guardando endTimeUTC")
-                    requests.get(GAS_WEBHOOK_URL, params={"action": "stream_stop"}, timeout=5)
-                
-                stream_is_online = live
-            elif r.status_code == 401:
-                print("❌ Error 401: APP_TOKEN inválido o expirado")
+    async with aiohttp.ClientSession() as session:
+        access_token = await get_app_access_token(session)
+        log("🔑 App Access Token obtenido")
 
-            # Espera 30 segundos antes de volver a preguntar
-            await asyncio.sleep(POLL_INTERVAL)
+        url = f"https://api.twitch.tv/helix/streams?user_id={BROADCASTER_ID}"
 
-        except Exception as e:
-            print(f"⚠ (API) Error polling: {e}. Reintentando en 60s.")
-            await asyncio.sleep(60)
+        while True:
+            try:
+                headers = {
+                    "Client-ID": CLIENT_ID,
+                    "Authorization": f"Bearer {access_token}"
+                }
 
-# ========= MAIN =========
+                async with session.get(url, headers=headers) as r:
+                    if r.status == 401:
+                        log("🔄 Token expirado, renovando")
+                        access_token = await get_app_access_token(session)
+
+                    elif r.status == 200:
+                        data = await r.json()
+                        live = len(data.get("data", [])) > 0
+
+                        if live and not stream_is_online:
+                            log("🔴 STREAM INICIADO")
+                            await session.get(GAS_WEBHOOK_URL, params={"action": "stream_start"})
+
+                        elif not live and stream_is_online:
+                            log("⚫ STREAM FINALIZADO")
+                            await session.get(GAS_WEBHOOK_URL, params={"action": "stream_stop"})
+
+                        stream_is_online = live
+
+                await asyncio.sleep(POLL_INTERVAL)
+
+            except Exception as e:
+                log(f"⚠ API error: {e}")
+                await asyncio.sleep(60)
+
+# ================= MAIN =================
 async def main():
-    task1 = asyncio.create_task(connect_to_chat())
-    task2 = asyncio.create_task(poll_stream_status())
-    await asyncio.gather(task1, task2)
+    log("=== BOT ASISTENCIA v4 — ESTABLE ===")
+    await asyncio.gather(
+        connect_to_chat(),
+        poll_stream_status()
+    )
 
 if __name__ == "__main__":
-    print("=== BOT ASISTENCIA v3 — FINAL AZURE ===")
-    print(f"URL GAS: {GAS_WEBHOOK_URL}")
-
-    # 1. ARRANCAMOS EL SERVIDOR WEB (Flask) EN UN HILO APARTE
-    server_thread = threading.Thread(target=run_web_server)
-    server_thread.daemon = True 
-    server_thread.start()
-    
-    # 2. ARRANCAMOS EL BOT
     try:
         asyncio.run(main())
     except KeyboardInterrupt:
-        print("\nCerrando bot...")
+        log("🛑 Bot detenido")
